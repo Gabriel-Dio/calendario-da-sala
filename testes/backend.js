@@ -52,7 +52,7 @@ function criarPlanilha() {
 let planilha = criarPlanilha();
 
 const stubs = {
-  SpreadsheetApp: { getActive: () => planilha },
+  SpreadsheetApp: { getActive: () => planilha, flush: () => {} },
   ContentService: {
     MimeType: { JSON: 'json' },
     createTextOutput: s => ({ texto: s, setMimeType() { return this; } })
@@ -140,6 +140,19 @@ aba.appendRow(['zz3', new Date(2026, 10, 20), 'prova', 'Arte', 'P1', '']); // da
 const lista = get().eventos;
 ok('ignora sem titulo e sem data', lista.filter(e => e.id === 'zz1' || e.id === 'zz2').length, 0);
 ok('aceita Date do Sheets', lista.find(e => e.id === 'zz3').data, '2026-11-20');
+
+console.log('\n== data vinda do Sheets de outro contexto ==');
+/* O Sheets devolve datas como Date, mas de um contexto diferente:
+   `instanceof Date` pode falhar. Este objeto imita isso — parece
+   uma data, responde getTime, mas nao e instanceof Date. */
+function DataEstrangeira(y, m, d) { this._d = new Date(y, m, d); }
+DataEstrangeira.prototype.getTime = function () { return this._d.getTime(); };
+DataEstrangeira.prototype.toString = function () { return this._d.toString(); };
+ok('nao e instanceof Date', new DataEstrangeira(2026, 10, 20) instanceof Date, false);
+
+aba.appendRow(['zz4', new DataEstrangeira(2026, 10, 25), 'prova', 'Arte', 'P2', '']);
+const achado = get().eventos.find(e => e.id === 'zz4');
+ok('aceita Date de outro contexto', achado && achado.data, '2026-11-25');
 
 console.log('\n== cabecalho ==');
 ok('cabecalho criado', aba.dados[0], ['id', 'data', 'tipo', 'materia', 'titulo', 'obs']);

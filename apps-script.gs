@@ -81,6 +81,9 @@ function doPost(e) {
       default:
         return json({ ok: false, erro: 'ação desconhecida' });
     }
+    // Garante que a escrita foi aplicada antes de reler: sem isto, a
+    // leitura seguinte pode não ver o que acabou de ser gravado.
+    SpreadsheetApp.flush();
     return json({ ok: true, eventos: lerTudo() });
   } catch (err) {
     return json({ ok: false, erro: String(err) });
@@ -179,12 +182,22 @@ function acharLinha(id) {
 
 /* ---------------------- auxiliares ---------------------- */
 
-/** Aceita Date (o Sheets converte sozinho) ou texto em vários formatos. */
+/**
+ * Aceita Date (o Sheets converte datas sozinho) ou texto em vários
+ * formatos. Devolve '' no que não for data — e quem chama descarta
+ * a linha.
+ *
+ * O teste é por comportamento (`getTime`), não por `instanceof Date`:
+ * as datas que o Sheets devolve podem vir de outro contexto de
+ * execução, onde `instanceof` dá falso e a data seria descartada
+ * como se a linha estivesse sem data.
+ */
 function normalizarData(v) {
-  if (v instanceof Date) {
-    return Utilities.formatDate(v, Session.getScriptTimeZone(), 'yyyy-MM-dd');
+  if (v && typeof v.getTime === 'function' && !isNaN(v.getTime())) {
+    return deMilissegundos(v.getTime());
   }
-  var s = String(v || '').trim();
+
+  var s = String(v == null ? '' : v).trim();
   if (!s) return '';
 
   var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);                 // 2026-10-14
@@ -196,7 +209,18 @@ function normalizarData(v) {
     if (a < 100) a += 2000;
     return a + '-' + pad(m[2]) + '-' + pad(m[1]);
   }
+
+  // Último recurso: texto de data do próprio motor, como
+  // "Wed Oct 14 2026 00:00:00 GMT-0300".
+  var t = Date.parse(s);
+  if (!isNaN(t)) return deMilissegundos(t);
+
   return '';
+}
+
+function deMilissegundos(ms) {
+  var d = new Date(ms);
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 }
 
 function pad(n) { return String(n).length < 2 ? '0' + n : String(n); }
