@@ -22,7 +22,8 @@ const fonte = [
   bloco('function normalizarEvento(', '\n}'),
   bloco('function salvarCache(', '\n}'),
   bloco('function lerCache(', '\n}'),
-  bloco('function aplicarCache(', '\n}')
+  bloco('function aplicarCache(', '\n}'),
+  bloco('function corMateria(', '\n}')
 ].join('\n\n');
 
 /* O cache e o aplicarCache mexem em localStorage e no estado da
@@ -44,7 +45,7 @@ const prelude = `
 const M = new Function(prelude + fonte + `
   return {
     pad, paraISO, deISO, diasEntre, chave, normalizarTipo, normalizarEvento,
-    salvarCache, lerCache, aplicarCache,
+    salvarCache, lerCache, aplicarCache, corMateria,
     _eventos: () => eventos,
     _atualizadoEm: () => atualizadoEm,
     _crua: v => { _loja[CHAVE_CACHE] = v; },
@@ -100,6 +101,34 @@ ok('aguenta null', M.normalizarEvento(null),
   { id: '', data: '', tipo: 'aviso', materia: '', titulo: '', obs: '' });
 ok('tira espacos', M.normalizarEvento({ titulo: '  P2  ', materia: ' Física ' }).titulo, 'P2');
 ok('tipo normalizado', M.normalizarEvento({ tipo: 'Lição de casa' }).tipo, 'entrega');
+
+console.log('\n== cor por materia ==');
+ok('mesmo nome, mesma cor',
+  M.corMateria('Física') === M.corMateria('Física'), true);
+ok('maiusculas nao mudam a cor',
+  M.corMateria('FISICA'), M.corMateria('fisica'));
+ok('acento nao muda a cor',
+  M.corMateria('Física'), M.corMateria('Fisica'));
+ok('espacos em volta nao mudam a cor',
+  M.corMateria('  Física  '), M.corMateria('Física'));
+ok('sem materia usa o tom neutro', M.corMateria(''), 'var(--m0)');
+ok('null nao quebra', M.corMateria(null), 'var(--m0)');
+
+/* A propriedade que o usuario pediu: a cor acompanha o nome, nao a
+   posicao numa lista. Cadastrar uma materia nova nao pode repintar
+   as que ja estavam. */
+const materias = ['Português', 'Matemática', 'Física', 'Química', 'Biologia', 'História',
+                  'Geografia', 'Filosofia', 'Sociologia', 'Inglês', 'Educação Física', 'Artes'];
+const antes = materias.map(M.corMateria);
+const depois = ['Espanhol', 'Redação'].concat(materias).map(M.corMateria).slice(2);
+ok('materia nova nao repinta as outras', depois, antes);
+
+materias.forEach(m => {
+  const c = M.corMateria(m);
+  if (!/^var\(--m(1[0-2]|[1-9])\)$/.test(c)) { falhas++; console.log('  FALHA  cor invalida para ' + m + ': ' + c); }
+});
+ok('todas as 12 materias caem em slots validos', true, true);
+console.log('  (info) cores distintas entre as 12 materias de exemplo: ' + new Set(antes).size + ' de 12');
 
 console.log('\n== cache (primeira pintura da pagina) ==');
 const amostra = [

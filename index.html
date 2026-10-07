@@ -8,9 +8,19 @@
 :root{
   --bg:#f4f6f9; --surface:#ffffff; --surface-2:#eef1f6; --border:#dfe4ec;
   --text:#121620; --dim:#6a7382; --accent:#4f46e5;
+  /* cores de estado da interface — reservadas, nunca usadas para matéria */
   --prova:#dc2626; --trabalho:#2563eb; --entrega:#d97706; --outro:#0d9488;
   --shadow:0 1px 2px rgba(18,22,32,.06), 0 8px 24px rgba(18,22,32,.07);
   --radius:14px;
+
+  /* Paleta das matérias. Validada para modo claro: faixa de
+     luminosidade, piso de croma, separação para daltonismo e piso
+     de visão normal. Os tons do escuro são escolhidos para o fundo
+     escuro, não gerados por inversão. */
+  --m0:#6a7382;
+  --m1:#2a78d6;  --m2:#eb6834;  --m3:#1baf7a;  --m4:#eda100;
+  --m5:#e87ba4;  --m6:#008300;  --m7:#4a3aa7;  --m8:#e34948;
+  --m9:#0e9bb8;  --m10:#9d4edd; --m11:#6aa52b; --m12:#c2185b;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -18,6 +28,11 @@
     --text:#e9edf4; --dim:#98a2b3; --accent:#8b85f8;
     --prova:#f87171; --trabalho:#60a5fa; --entrega:#fbbf24; --outro:#2dd4bf;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+
+    --m0:#98a2b3;
+    --m1:#3987e5;  --m2:#d95926;  --m3:#199e70;  --m4:#c98500;
+    --m5:#d55181;  --m6:#008300;  --m7:#9085e9;  --m8:#e66767;
+    --m9:#1f9ab5;  --m10:#b06fe0; --m11:#6fa832; --m12:#e05080;
   }
 }
 :root[data-theme="dark"]{
@@ -25,6 +40,11 @@
   --text:#e9edf4; --dim:#98a2b3; --accent:#8b85f8;
   --prova:#f87171; --trabalho:#60a5fa; --entrega:#fbbf24; --outro:#2dd4bf;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+
+  --m0:#98a2b3;
+  --m1:#3987e5;  --m2:#d95926;  --m3:#199e70;  --m4:#c98500;
+  --m5:#d55181;  --m6:#008300;  --m7:#9085e9;  --m8:#e66767;
+  --m9:#1f9ab5;  --m10:#b06fe0; --m11:#6fa832; --m12:#e05080;
 }
 
 *{box-sizing:border-box}
@@ -101,7 +121,6 @@ select{
   opacity:.45;
 }
 .chip[aria-pressed="true"]{opacity:1;background:var(--surface-2)}
-.chip .dot{width:8px;height:8px;border-radius:50%;background:var(--t)}
 
 /* ---------- faixa de estado ---------- */
 #estado:empty{display:none}
@@ -207,7 +226,6 @@ select{
   .sala{font-size:11.5px;padding:5px 10px;letter-spacing:.04em}
   #rotulo-mes{min-width:0;font-size:15px;flex:1}
   .nav{flex:1;gap:2px}
-  select{flex:1;max-width:none}
   .tema{width:34px;padding:0;justify-content:center}
   .tema-txt{display:none}
 
@@ -309,7 +327,6 @@ label{display:block;font-size:12.5px;font-weight:650;color:var(--dim);margin:0 0
       </div>
       <button class="btn-hoje" id="btn-hoje">Hoje</button>
       <div class="spacer"></div>
-      <select id="filtro-materia"><option value="">Todas as matérias</option></select>
       <button class="icone-acao" id="btn-recarregar" title="Buscar atualizações" aria-label="Atualizar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20.5 3.5V10h-6.5"/>
@@ -396,11 +413,12 @@ const CHAVE_TEMA  = 'calendario-1anoa/tema';
 const CHAVE_CACHE = 'calendario-1anoa/cache';
 const CHAVE_SENHA = 'calendario-1anoa/senha';
 
+/* O tipo não carrega mais cor: ele é filtro e rótulo de texto. */
 const TIPOS = {
-  prova:    { rotulo:'Prova',    cor:'var(--prova)'    },
-  trabalho: { rotulo:'Trabalho', cor:'var(--trabalho)' },
-  entrega:  { rotulo:'Entrega',  cor:'var(--entrega)'  },
-  aviso:    { rotulo:'Aviso',    cor:'var(--outro)'    }
+  prova:    { rotulo:'Prova'    },
+  trabalho: { rotulo:'Trabalho' },
+  entrega:  { rotulo:'Entrega'  },
+  aviso:    { rotulo:'Aviso'    }
 };
 
 /* Usados só enquanto API_URL estiver vazio. */
@@ -420,7 +438,6 @@ const ISO_HOJE = paraISO(hoje);
 let ano = hoje.getFullYear();
 let mes = hoje.getMonth();
 let eventos = [];
-let filtroMateria = '';
 let tiposAtivos = new Set(Object.keys(TIPOS));
 let carregando = false;
 let atualizadoEm = 0;
@@ -597,9 +614,7 @@ function botaoTentar(){
 
 /* ---------------- consultas ---------------- */
 function visiveis(){
-  return eventos.filter(e =>
-    tiposAtivos.has(e.tipo) && (!filtroMateria || e.materia === filtroMateria)
-  );
+  return eventos.filter(e => tiposAtivos.has(e.tipo));
 }
 function porDia(){
   const mapa = {};
@@ -607,8 +622,26 @@ function porDia(){
   for(const k in mapa) mapa[k].sort((x,y) => x.tipo.localeCompare(y.tipo));
   return mapa;
 }
-function cor(tipo){ return (TIPOS[tipo] || TIPOS.aviso).cor; }
 function rotulo(tipo){ return (TIPOS[tipo] || TIPOS.aviso).rotulo; }
+
+/* Cor da matéria, derivada do próprio nome: "Física" recebe o mesmo
+   tom hoje, no ano que vem e no aparelho de qualquer colega, sem
+   nada guardado em lugar nenhum. A cor segue a matéria, não a
+   posição dela numa lista — cadastrar uma matéria nova não repinta
+   as outras.
+   `chave` normaliza antes, então "Física", "FISICA" e "fisica " são
+   a mesma matéria e a mesma cor.
+   Com ~12 matérias é impossível que todos os pares de cor sejam
+   distinguíveis (medido: só 3 cores passam esse teste), então o
+   nome da matéria aparece escrito junto da cor em todo lugar. A cor
+   acelera o reconhecimento; quem identifica é o texto. */
+function corMateria(materia){
+  const k = chave(materia);
+  if(!k) return 'var(--m0)';
+  let h = 0x811c9dc5;
+  for(let i = 0; i < k.length; i++) h = Math.imul(h ^ k.charCodeAt(i), 16777619) >>> 0;
+  return 'var(--m' + (h % 12 + 1) + ')';
+}
 function editando(){ return !!senha; }
 
 /* ---------------- render: barra ---------------- */
@@ -619,9 +652,9 @@ function renderChips(){
     const k = par[0], v = par[1];
     const b = document.createElement('button');
     b.className = 'chip';
-    b.style.setProperty('--t', v.cor);
     b.setAttribute('aria-pressed', tiposAtivos.has(k));
-    b.innerHTML = '<span class="dot"></span>' + v.rotulo;
+    /* Sem bolinha colorida: cor agora quer dizer matéria, e só. */
+    b.textContent = v.rotulo;
     b.onclick = () => {
       tiposAtivos.has(k) ? tiposAtivos.delete(k) : tiposAtivos.add(k);
       if(tiposAtivos.size === 0) tiposAtivos = new Set(Object.keys(TIPOS));
@@ -629,13 +662,6 @@ function renderChips(){
     };
     box.appendChild(b);
   }
-}
-function renderMaterias(){
-  const sel = document.getElementById('filtro-materia');
-  const lista = [...new Set(eventos.map(e => e.materia).filter(Boolean))].sort((a,b) => a.localeCompare(b,'pt-BR'));
-  if(filtroMateria && lista.indexOf(filtroMateria) === -1) filtroMateria = '';
-  sel.innerHTML = '<option value="">Todas as matérias</option>' +
-    lista.map(m => '<option' + (m === filtroMateria ? ' selected' : '') + '>' + esc(m) + '</option>').join('');
 }
 
 /* ---------------- render: grade ---------------- */
@@ -680,7 +706,7 @@ function renderGrade(){
       lista.slice(0, limite).forEach(e => {
         const chip = document.createElement('span');
         chip.className = 'ev';
-        chip.style.setProperty('--t', cor(e.tipo));
+        chip.style.setProperty('--t', corMateria(e.materia));
         chip.textContent = (e.materia ? e.materia + ' · ' : '') + e.titulo;
         box.appendChild(chip);
       });
@@ -719,7 +745,7 @@ function renderProximos(){
     const quando = dias === 0 ? 'hoje' : dias === 1 ? 'amanhã' : 'em ' + dias + ' dias';
     const b = document.createElement('button');
     b.className = 'prox-item';
-    b.style.setProperty('--t', cor(e.tipo));
+    b.style.setProperty('--t', corMateria(e.materia));
     b.innerHTML =
       '<span class="quando"><b>' + d.getDate() + '</b><small>' +
         d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','') + '</small></span>' +
@@ -747,7 +773,6 @@ function renderRodape(){
 }
 
 function renderTudo(){
-  renderMaterias();
   renderChips();
   renderGrade();
   renderProximos();
@@ -778,7 +803,7 @@ function abrirDia(iso){
   for(const e of lista){
     const el = document.createElement('div');
     el.className = 'det';
-    el.style.setProperty('--t', cor(e.tipo));
+    el.style.setProperty('--t', corMateria(e.materia));
     el.innerHTML =
       '<span class="faixa"></span>' +
       '<div class="info"><span class="tipo">' + rotulo(e.tipo) +
@@ -951,7 +976,7 @@ function abrirAdmin(tela, evento){
     const d = deISO(e.data);
     const l = document.createElement('div');
     l.className = 'lin';
-    l.style.setProperty('--t', cor(e.tipo));
+    l.style.setProperty('--t', corMateria(e.materia));
     l.innerHTML =
       '<span class="d">' + pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + String(d.getFullYear()).slice(2) + '</span>' +
       '<span class="t"><i>' + rotulo(e.tipo) + '</i> · ' + esc(e.materia || '—') + ' · ' + esc(e.titulo) + '</span>';
@@ -1097,9 +1122,6 @@ document.getElementById('ant').onclick  = () => mover(-1);
 document.getElementById('prox').onclick = () => mover(1);
 document.getElementById('btn-hoje').onclick = () => {
   ano = hoje.getFullYear(); mes = hoje.getMonth(); renderTudo();
-};
-document.getElementById('filtro-materia').onchange = function(){
-  filtroMateria = this.value; renderTudo();
 };
 document.getElementById('btn-recarregar').onclick = () => { if(!carregando) carregar(); };
 document.getElementById('btn-admin').onclick = () => abrirAdmin(editando() ? 'painel' : 'login');
