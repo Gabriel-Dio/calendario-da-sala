@@ -67,8 +67,10 @@ editar → Versão: Nova versão**, senão o site continua usando a versão anti
 ## Detalhes
 
 - Sem dependências e sem build: um arquivo HTML.
-- A última leitura boa fica em cache no navegador de cada visitante, então o
-  calendário abre sem internet — com aviso de que está desatualizado.
+- A última leitura boa fica em cache no navegador de cada visitante. A página
+  pinta esse cache imediatamente e busca a versão nova por baixo, então o
+  calendário aparece na hora para quem já visitou, em vez de esperar os ~2,5s
+  do Apps Script. Sem internet, fica o cache com aviso de desatualizado.
 - Escritas usam `LockService`, para dois cadastros ao mesmo tempo não se
   sobrescreverem.
 - Senha errada leva 1,2s para responder, o que encarece tentar adivinhar.

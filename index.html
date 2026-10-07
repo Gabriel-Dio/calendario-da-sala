@@ -486,6 +486,17 @@ function comTimeout(){
   return AbortSignal.timeout ? AbortSignal.timeout(TIMEOUT) : undefined;
 }
 
+/* Pinta o que já se sabe antes de falar com o Apps Script, que leva
+   uns 2,5s. Quem já visitou vê o calendário na hora e a atualização
+   acontece por baixo; o rodapé mostra a idade do que está na tela. */
+function aplicarCache(){
+  const c = lerCache();
+  if(!c || !Array.isArray(c.lista) || !c.lista.length) return false;
+  eventos = c.lista.map(normalizarEvento).filter(e => e.data && e.titulo);
+  atualizadoEm = c.em;
+  return true;
+}
+
 async function carregar(){
   if(!API_URL){
     eventos = EXEMPLOS.map(normalizarEvento);
@@ -1110,8 +1121,9 @@ document.addEventListener('visibilitychange', () => {
   if(!document.hidden && API_URL && Date.now() - atualizadoEm > 300000) carregar();
 });
 
+aplicarCache();   // primeira pintura, instantânea
 renderTudo();
-carregar();
+carregar();       // e a busca de verdade por baixo
 if(location.hash === '#admin') abrirAdmin(editando() ? 'painel' : 'login');
 </script>
 </body>
