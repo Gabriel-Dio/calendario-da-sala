@@ -52,6 +52,11 @@ nada vira *aviso*.
 2. Nela: **Extensões → Apps Script**. Apague o `Code.gs` e cole o
    `apps-script.gs` deste repositório.
 3. Troque o valor de `SENHA` no topo do arquivo.
+
+   A senha fica **só no editor do Google**, nunca aqui: este repositório é
+   público, e uma senha versionada seria uma senha publicada. Se existir um
+   `apps-script.local.gs` na sua máquina, é a cópia com a senha já preenchida
+   para colar — ela é ignorada pelo git de propósito.
 4. **Implantar → Nova implantação → App da Web**, executando como **Eu**, com
    acesso para **Qualquer pessoa**. Autorize quando o Google pedir.
 5. Copie a URL que termina em `/exec` e cole em `API_URL`, no `index.html`.
