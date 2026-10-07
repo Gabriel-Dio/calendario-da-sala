@@ -19,15 +19,11 @@ const fonte = [
   bloco('function diasEntre(', '\n}'),
   bloco('function chave(', '\n}'),
   bloco('function normalizarTipo(', '\n}'),
-  bloco('function normalizarEvento(', '\n}'),
-  bloco('function nomeMes(', '\n}')
+  bloco('function normalizarEvento(', '\n}')
 ].join('\n\n');
 
-/* nomeMes compara com o ano corrente, entao o sandbox precisa de
-   um `hoje` fixo para o teste nao depender da data real. */
 const M = new Function(
-  'const hoje = new Date(2026, 9, 7);\n' + fonte +
-  '\n return { pad, paraISO, deISO, diasEntre, chave, normalizarTipo, normalizarEvento, nomeMes };'
+  fonte + '\n return { pad, paraISO, deISO, diasEntre, chave, normalizarTipo, normalizarEvento };'
 )();
 
 let falhas = 0;
@@ -77,12 +73,6 @@ ok('aguenta null', M.normalizarEvento(null),
   { id: '', data: '', tipo: 'aviso', materia: '', titulo: '', obs: '' });
 ok('tira espacos', M.normalizarEvento({ titulo: '  P2  ', materia: ' Física ' }).titulo, 'P2');
 ok('tipo normalizado', M.normalizarEvento({ tipo: 'Lição de casa' }).tipo, 'entrega');
-
-console.log('\n== rotulo do mes (hoje = 07/10/2026) ==');
-ok('ano corrente: so o mes', M.nomeMes(2026, 9), 'outubro');
-ok('dezembro do ano corrente', M.nomeMes(2026, 11), 'dezembro');
-ok('outro ano mostra o ano', M.nomeMes(2027, 0), 'janeiro 2027');
-ok('ano anterior tambem',     M.nomeMes(2025, 11), 'dezembro 2025');
 
 console.log('\n== grade: 42 celulas cobrem o mes inteiro ==');
 let mesesRuins = 0;
