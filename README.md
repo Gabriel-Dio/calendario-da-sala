@@ -3,7 +3,7 @@
 Calendário de provas, trabalhos e entregas da turma. A turma abre o link e
 consulta; só quem tem a senha adiciona, edita ou remove.
 
-**Site:** https://gabriel-dio.github.io/calendario-da-sala/
+**Site:** https://calendariotarefas.github.io/
 
 ## Como funciona
 
