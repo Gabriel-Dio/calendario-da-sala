@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calendário — 1º Ano A</title>
+<style>
+:root{
+  --bg:#f4f6f9; --surface:#ffffff; --surface-2:#eef1f6; --border:#dfe4ec;
+  --text:#121620; --dim:#6a7382; --accent:#4f46e5;
+  --prova:#dc2626; --trabalho:#2563eb; --entrega:#d97706; --outro:#0d9488;
+  --shadow:0 1px 2px rgba(18,22,32,.06), 0 8px 24px rgba(18,22,32,.07);
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1117; --surface:#171b23; --surface-2:#1f242e; --border:#2a3140;
+    --text:#e9edf4; --dim:#98a2b3; --accent:#8b85f8;
+    --prova:#f87171; --trabalho:#60a5fa; --entrega:#fbbf24; --outro:#2dd4bf;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1117; --surface:#171b23; --surface-2:#1f242e; --border:#2a3140;
+  --text:#e9edf4; --dim:#98a2b3; --accent:#8b85f8;
+  --prova:#f87171; --trabalho:#60a5fa; --entrega:#fbbf24; --outro:#2dd4bf;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--text);
+  font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+
+.wrap{max-width:1120px;margin:0 auto;padding:18px 16px 48px}
+
+/* ---------- barra unica: sala + navegacao + filtros ---------- */
+.bar{
+  display:flex;flex-direction:column;gap:9px;
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:10px 12px;box-shadow:var(--shadow);margin-bottom:12px;
+}
+.bar-linha{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.sala{
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  font-size:13px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--accent);background:color-mix(in srgb, var(--accent) 12%, transparent);
+  border-radius:999px;padding:6px 12px;
+}
+.sala::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.nav{display:flex;align-items:center;gap:6px}
+.nav button{
+  background:transparent;border:1px solid var(--border);border-radius:9px;
+  width:34px;height:34px;display:grid;place-items:center;font-size:16px;
+}
+.nav button:hover{background:var(--surface-2)}
+#rotulo-mes{min-width:160px;text-align:center;font-weight:650;font-size:16px;text-transform:capitalize}
+.btn-hoje{
+  background:transparent;border:1px solid var(--border);border-radius:9px;
+  padding:7px 12px;font-size:13px;font-weight:600;
+}
+.btn-hoje:hover{background:var(--surface-2)}
+.bar .spacer{flex:1}
+select{
+  background:var(--surface-2);border:1px solid var(--border);border-radius:9px;
+  padding:7px 10px;font-size:13px;max-width:170px;
+}
+
+/* botao de recarregar */
+.icone-acao{
+  background:transparent;border:1px solid var(--border);border-radius:9px;
+  width:34px;height:34px;display:grid;place-items:center;
+}
+.icone-acao:hover{background:var(--surface-2)}
+.icone-acao svg{width:16px;height:16px}
+.icone-acao.girando svg{animation:girar .8s linear infinite}
+@keyframes girar{to{transform:rotate(360deg)}}
+
+/* botao de tema: sol / lua / meio-a-meio + nome do modo */
+.tema{
+  display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 11px;
+  background:transparent;border:1px solid var(--border);border-radius:9px;
+  font-size:12.5px;font-weight:600;
+}
+.tema:hover{background:var(--surface-2)}
+.tema svg{width:16px;height:16px;display:block;flex:0 0 16px}
+.tema-txt{color:var(--dim)}
+
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{
+  border:1px solid var(--border);background:transparent;border-radius:999px;
+  padding:5px 11px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;
+  opacity:.45;
+}
+.chip[aria-pressed="true"]{opacity:1;background:var(--surface-2)}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:var(--t)}
+
+/* ---------- faixa de estado (carregando / erro / demo) ---------- */
+#estado:empty{display:none}
+.faixa-estado{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  font-size:13px;padding:10px 13px;border-radius:var(--radius);margin-bottom:12px;
+  border:1px solid var(--border);background:var(--surface);
+}
+.faixa-estado b{font-weight:700}
+.faixa-estado.alerta{
+  background:color-mix(in srgb, var(--entrega) 13%, transparent);
+  border-color:color-mix(in srgb, var(--entrega) 32%, transparent);
+}
+.faixa-estado.ruim{
+  background:color-mix(in srgb, var(--prova) 11%, transparent);
+  border-color:color-mix(in srgb, var(--prova) 30%, transparent);
+}
+.faixa-estado .spacer{flex:1}
+.faixa-estado button{
+  border:1px solid var(--border);background:var(--surface);border-radius:9px;
+  padding:6px 12px;font-size:12.5px;font-weight:600;
+}
+.faixa-estado code{
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+  background:var(--surface-2);padding:1px 5px;border-radius:5px;
+}
+
+/* ---------- layout principal ---------- */
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px;align-items:start}
+@media (max-width:860px){ .cols{grid-template-columns:1fr} }
+
+.card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+
+/* ---------- grade do calendario ---------- */
+.semana{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--border)}
+.semana span{
+  padding:10px 6px;text-align:center;font-size:11.5px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--dim);
+}
+.grade{display:grid;grid-template-columns:repeat(7,1fr)}
+.dia{
+  aspect-ratio:1/1;min-height:0;overflow:hidden;
+  padding:7px 7px 8px;border-right:1px solid var(--border);
+  border-bottom:1px solid var(--border);background:transparent;text-align:left;
+  display:flex;flex-direction:column;gap:4px;position:relative;
+}
+.dia:nth-child(7n){border-right:none}
+.grade .dia:nth-last-child(-n+7){border-bottom:none}
+.dia:hover{background:var(--surface-2)}
+.dia.fora{opacity:.35}
+.dia .num{font-size:13px;font-weight:600;color:var(--dim);line-height:1.2}
+.dia.hoje .num{
+  background:var(--accent);color:#fff;border-radius:50%;
+  width:23px;height:23px;display:grid;place-items:center;font-weight:700;
+}
+.lista-ev{display:flex;flex-direction:column;gap:4px;min-height:0;overflow:hidden}
+.ev{
+  font-size:11.5px;line-height:1.35;padding:3px 6px;border-radius:6px;
+  background:color-mix(in srgb, var(--t) 16%, transparent);
+  color:var(--t);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  border-left:2.5px solid var(--t);flex:0 0 auto;
+}
+/* contador de itens escondidos: selo absoluto, nao ocupa altura */
+.mais{
+  position:absolute;top:6px;right:6px;font-size:10px;font-weight:700;
+  color:var(--dim);background:var(--surface-2);border-radius:999px;padding:1px 5px;
+}
+
+/* ---------- lista de proximos ---------- */
+.lado h2{
+  margin:0;padding:13px 15px;font-size:12.5px;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--border);
+}
+.prox{display:flex;flex-direction:column}
+.prox-item{
+  display:flex;gap:11px;align-items:flex-start;padding:11px 15px;
+  border-bottom:1px solid var(--border);background:transparent;text-align:left;width:100%;
+}
+.prox-item:last-child{border-bottom:none}
+.prox-item:hover{background:var(--surface-2)}
+.prox-item .quando{
+  flex:0 0 46px;text-align:center;border-radius:9px;padding:4px 0;
+  background:color-mix(in srgb, var(--t) 14%, transparent);color:var(--t);
+}
+.prox-item .quando b{display:block;font-size:16px;line-height:1.1}
+.prox-item .quando small{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.prox-item .txt{min-width:0}
+.prox-item .txt b{display:block;font-size:13.5px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prox-item .txt small{color:var(--dim);font-size:12px}
+.vazio{padding:22px 15px;color:var(--dim);font-size:13.5px;text-align:center}
+
+/* ---------- rodape ---------- */
+.pe{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px;color:var(--dim);font-size:12.5px}
+.pe .spacer{flex:1}
+
+/* ---------- barra em telas estreitas ---------- */
+@media (max-width:620px){
+  .bar{padding:9px 10px;gap:8px}
+  .bar-linha{gap:7px}
+  .sala{font-size:11.5px;padding:5px 10px;letter-spacing:.04em}
+  #rotulo-mes{min-width:0;font-size:15px;flex:1}
+  .nav{flex:1;gap:2px}
+  select{flex:1;max-width:none}
+  .tema{width:34px;padding:0;justify-content:center}
+  .tema-txt{display:none}
+
+  .dia{padding:4px}
+  .dia .num{font-size:12px}
+  .lista-ev{flex-direction:row;flex-wrap:wrap;align-content:flex-start;gap:3px}
+  .ev{
+    flex:0 0 6px;width:6px;height:6px;min-width:6px;
+    font-size:0;padding:0;border-radius:50%;border-left:none;background:var(--t);
+  }
+  .mais{top:3px;right:3px;font-size:9px;padding:0 3px;background:transparent}
+}
+
+/* ---------- modal do dia ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(10,12,18,.5);backdrop-filter:blur(3px);
+  display:none;place-items:center;padding:16px;z-index:50;
+}
+.overlay.on{display:grid}
+.modal{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.35);width:100%;max-width:520px;
+  max-height:88vh;display:flex;flex-direction:column;overflow:hidden;
+}
+.modal header{
+  display:flex;align-items:center;gap:10px;padding:15px 18px;border-bottom:1px solid var(--border);
+}
+.modal header h3{margin:0;font-size:16px;flex:1;text-transform:capitalize}
+.modal header button{background:none;border:none;font-size:20px;color:var(--dim);line-height:1;padding:0 2px}
+.modal .corpo{padding:16px 18px;overflow:auto}
+.modal footer{
+  display:flex;gap:8px;justify-content:flex-end;padding:13px 18px;
+  border-top:1px solid var(--border);background:var(--surface-2);
+}
+.btn{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:600}
+.btn:hover{background:var(--surface-2)}
+
+.det{display:flex;gap:11px;padding:11px;border-radius:11px;background:var(--surface-2);margin-bottom:9px}
+.det .faixa{width:3px;border-radius:2px;background:var(--t);flex:0 0 3px}
+.det .info{flex:1;min-width:0}
+.det .tipo{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--t)}
+.det .info b{display:block;font-size:14.5px;margin:2px 0}
+.det .info p{margin:3px 0 0;font-size:13px;color:var(--dim);white-space:pre-wrap}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="bar">
+    <div class="bar-linha">
+      <span class="sala">1º Ano A</span>
+      <div class="nav">
+        <button id="ant" title="Mês anterior">&lsaquo;</button>
+        <span id="rotulo-mes"></span>
+        <button id="prox" title="Mês seguinte">&rsaquo;</button>
+      </div>
+      <button class="btn-hoje" id="btn-hoje">Hoje</button>
+      <div class="spacer"></div>
+      <select id="filtro-materia"><option value="">Todas as matérias</option></select>
+      <button class="icone-acao" id="btn-recarregar" title="Buscar atualizações na planilha" aria-label="Atualizar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20.5 3.5V10h-6.5"/>
+        </svg>
+      </button>
+      <button class="tema" id="btn-tema">
+        <span class="tema-icone" id="tema-icone"></span>
+        <span class="tema-txt" id="tema-txt"></span>
+      </button>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div id="estado"></div>
+
+  <div class="cols">
+    <div class="card">
+      <div class="semana">
+        <span>dom</span><span>seg</span><span>ter</span><span>qua</span><span>qui</span><span>sex</span><span>sáb</span>
+      </div>
+      <div class="grade" id="grade"></div>
+    </div>
+
+    <div class="card lado">
+      <h2>Próximos</h2>
+      <div class="prox" id="prox-lista"></div>
+    </div>
+  </div>
+
+  <div class="pe">
+    <span id="contagem"></span>
+    <div class="spacer"></div>
+    <span id="atualizado"></span>
+  </div>
+</div>
+
+<div class="overlay" id="ov-dia">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dia-titulo">
+    <header><h3 id="dia-titulo"></h3><button data-fechar="ov-dia" aria-label="Fechar">&times;</button></header>
+    <div class="corpo" id="dia-corpo"></div>
+    <footer><button class="btn" data-fechar="ov-dia">Fechar</button></footer>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Calendário do 1º Ano A
+
+   A planilha do Google é a única fonte dos dados. A página só lê:
+   ninguém que abrir o site consegue alterar nada, nem pelo
+   navegador. Para mudar o calendário, muda-se a planilha.
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   CONFIGURAÇÃO — cole aqui o link CSV publicado da planilha.
+   Na planilha: Arquivo > Compartilhar > Publicar na web >
+   aba desejada > "Valores separados por vírgula (.csv)" >
+   Publicar. Copie o link gerado e cole abaixo.
+
+   Colunas esperadas (a primeira linha é o cabeçalho; a ordem
+   não importa e maiúsculas/acentos são ignorados):
+   data | tipo | materia | titulo | obs
+   ------------------------------------------------------------ */
+const CSV_URL = '';
+
+/* Quanto tempo esperar pela planilha antes de desistir (ms). */
+const TIMEOUT = 12000;
+
+const CHAVE_TEMA  = 'calendario-1anoa/tema';
+const CHAVE_CACHE = 'calendario-1anoa/cache';
+
+const TIPOS = {
+  prova:    { rotulo:'Prova',    cor:'var(--prova)'    },
+  trabalho: { rotulo:'Trabalho', cor:'var(--trabalho)' },
+  entrega:  { rotulo:'Entrega',  cor:'var(--entrega)'  },
+  aviso:    { rotulo:'Aviso',    cor:'var(--outro)'    }
+};
+
+/* Usados só enquanto CSV_URL estiver vazio, para a página ter o
+   que mostrar enquanto você monta a planilha. */
+const EXEMPLOS = [
+  { data:'2026-10-09', tipo:'entrega',  materia:'Português',  titulo:'Entrega da resenha',     obs:'Mínimo 2 páginas, impressa.' },
+  { data:'2026-10-14', tipo:'prova',    materia:'Física',     titulo:'P2 — Cinemática',        obs:'Capítulos 3 e 4. Pode levar calculadora.' },
+  { data:'2026-10-14', tipo:'trabalho', materia:'História',   titulo:'Apresentação em grupo',  obs:'Grupos de 4, 10 min cada.' },
+  { data:'2026-10-21', tipo:'prova',    materia:'Matemática', titulo:'Prova de funções',       obs:'' },
+  { data:'2026-10-28', tipo:'trabalho', materia:'Biologia',   titulo:'Maquete da célula',      obs:'Material livre.' },
+  { data:'2026-11-05', tipo:'prova',    materia:'Química',    titulo:'P3 — Ligações químicas', obs:'' },
+  { data:'2026-11-11', tipo:'aviso',    materia:'Geral',      titulo:'Conselho de classe',     obs:'Sem aula no período da tarde.' }
+];
+
+/* ---------------- estado ---------------- */
+const hoje = new Date();
+const ISO_HOJE = paraISO(hoje);
+let ano = hoje.getFullYear();
+let mes = hoje.getMonth();
+let eventos = [];
+let filtroMateria = '';
+let tiposAtivos = new Set(Object.keys(TIPOS));
+let carregando = false;
+let atualizadoEm = 0;
+
+/* ---------------- datas ---------------- */
+function pad(n){ return String(n).padStart(2,'0'); }
+function paraISO(d){ return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate()); }
+function deISO(iso){
+  const p = String(iso).split('-').map(Number);
+  return new Date(p[0], p[1]-1, p[2]);
+}
+function diasEntre(isoA, isoB){ return Math.round((deISO(isoB) - deISO(isoA)) / 86400000); }
+function nomeMes(a, m){ return new Date(a, m, 1).toLocaleDateString('pt-BR', { month:'long', year:'numeric' }); }
+function dataLonga(iso){ return deISO(iso).toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' }); }
+
+/* ---------------- leitura do CSV ----------------
+   Parser completo: aceita campos entre aspas com vírgula e
+   quebra de linha dentro (observações longas funcionam). */
+function lerCSV(txt){
+  const linhas = [];
+  let linha = [], campo = '', dentro = false;
+  txt = String(txt).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  for(let i=0;i<txt.length;i++){
+    const c = txt[i];
+    if(dentro){
+      if(c === '"'){
+        if(txt[i+1] === '"'){ campo += '"'; i++; }
+        else dentro = false;
+      }else campo += c;
+    }else{
+      if(c === '"') dentro = true;
+      else if(c === ','){ linha.push(campo); campo = ''; }
+      else if(c === '\n'){ linha.push(campo); linhas.push(linha); linha = []; campo = ''; }
+      else campo += c;
+    }
+  }
+  if(campo.length || linha.length){ linha.push(campo); linhas.push(linha); }
+  return linhas;
+}
+
+/* "Matéria" -> "materia", "Observações" -> "observacoes" */
+function chave(s){
+  return String(s == null ? '' : s).trim().toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+/* Aceita vários nomes de coluna, para a planilha não precisar
+   usar exatamente as minhas palavras. */
+const COLUNAS = {
+  data:'data', dia:'data', quando:'data', datas:'data',
+  tipo:'tipo', categoria:'tipo', oque:'tipo',
+  materia:'materia', disciplina:'materia', materias:'materia',
+  titulo:'titulo', assunto:'titulo', nome:'titulo', descricao:'titulo',
+  obs:'obs', obs1:'obs', observacao:'obs', observacoes:'obs',
+  detalhes:'obs', conteudo:'obs', anotacoes:'obs'
+};
+
+function normalizarData(v){
+  const s = String(v == null ? '' : v).trim();
+  if(!s) return '';
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);              // 2026-10-14 (e ISO com hora)
+  if(m) return m[1] + '-' + pad(m[2]) + '-' + pad(m[3]);
+  m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);   // 14/10/2026 ou 14/10/26
+  if(m){
+    let a = Number(m[3]);
+    if(a < 100) a += 2000;
+    return a + '-' + pad(m[2]) + '-' + pad(m[1]);
+  }
+  m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})$/);                   // 14/10 -> assume o ano atual
+  if(m) return hoje.getFullYear() + '-' + pad(m[2]) + '-' + pad(m[1]);
+  return '';
+}
+
+/* Busca por pedaço, não por igualdade: na planilha as pessoas
+   escrevem "lição de casa" ou "trabalho em grupo", não a palavra
+   exata que o código espera. */
+function normalizarTipo(v){
+  const k = chave(v);
+  if(!k) return 'aviso';
+  const tem = alvos => alvos.some(a => k.indexOf(a) >= 0);
+  if(tem(['prova','teste','avaliacao','simulado','exame','recupera'])) return 'prova';
+  if(tem(['trabalho','apresenta','seminario','projeto','maquete'])) return 'trabalho';
+  if(tem(['entrega','tarefa','licao','dever','prazo','exercicio','redacao'])) return 'entrega';
+  return 'aviso';
+}
+
+function csvParaEventos(txt){
+  const linhas = lerCSV(txt).filter(l => l.some(c => String(c).trim() !== ''));
+  if(!linhas.length) return { lista: [], descartadas: 0 };
+
+  const cabecalho = linhas[0].map(c => COLUNAS[chave(c)] || null);
+  const temCabecalho = cabecalho.some(c => c !== null);
+  const corpo = temCabecalho ? linhas.slice(1) : linhas;
+  /* sem cabeçalho reconhecido, assume a ordem documentada */
+  const mapa = temCabecalho ? cabecalho : ['data','tipo','materia','titulo','obs'];
+
+  const fora = [];
+  const lista = [];
+  for(const l of corpo){
+    const reg = {};
+    mapa.forEach((campo, i) => { if(campo) reg[campo] = l[i]; });
+
+    const data = normalizarData(reg.data);
+    const titulo = String(reg.titulo == null ? '' : reg.titulo).trim();
+    if(!data || !titulo){ fora.push(l.join(',')); continue; }
+
+    lista.push({
+      data: data,
+      tipo: normalizarTipo(reg.tipo),
+      materia: String(reg.materia == null ? '' : reg.materia).trim(),
+      titulo: titulo,
+      obs: String(reg.obs == null ? '' : reg.obs).trim()
+    });
+  }
+  return { lista: lista, descartadas: fora.length };
+}
+
+/* ---------------- cache local ----------------
+   Guarda a última leitura boa da planilha. Se o Google estiver
+   fora do ar ou a pessoa sem internet, o calendário ainda abre. */
+function salvarCache(lista){
+  try{ localStorage.setItem(CHAVE_CACHE, JSON.stringify({ em:Date.now(), lista:lista })); }catch(e){}
+}
+function lerCache(){
+  try{
+    const c = JSON.parse(localStorage.getItem(CHAVE_CACHE));
+    if(c && Array.isArray(c.lista)) return c;
+  }catch(e){}
+  return null;
+}
+
+/* ---------------- carregamento ---------------- */
+async function carregar(){
+  if(!CSV_URL){
+    eventos = EXEMPLOS.slice();
+    mostrarEstado('demo');
+    renderTudo();
+    return;
+  }
+
+  carregando = true;
+  document.getElementById('btn-recarregar').classList.add('girando');
+  if(!eventos.length) mostrarEstado('carregando');
+
+  try{
+    const sep = CSV_URL.indexOf('?') >= 0 ? '&' : '?';
+    const resp = await fetch(CSV_URL + sep + 'cb=' + Date.now(), {
+      cache: 'no-store',
+      signal: AbortSignal.timeout ? AbortSignal.timeout(TIMEOUT) : undefined
+    });
+    if(!resp.ok) throw new Error('a planilha respondeu ' + resp.status);
+
+    const res = csvParaEventos(await resp.text());
+    if(!res.lista.length) throw new Error('nenhuma linha válida na planilha');
+
+    eventos = res.lista;
+    atualizadoEm = Date.now();
+    salvarCache(res.lista);
+    mostrarEstado(res.descartadas ? 'ignoradas' : 'ok', res.descartadas);
+  }catch(e){
+    const c = lerCache();
+    if(c){
+      eventos = c.lista;
+      atualizadoEm = c.em;
+      mostrarEstado('cache');
+    }else{
+      eventos = [];
+      mostrarEstado('erro', e.message || 'falha ao buscar');
+    }
+  }finally{
+    carregando = false;
+    document.getElementById('btn-recarregar').classList.remove('girando');
+    renderTudo();
+  }
+}
+
+function mostrarEstado(tipo, extra){
+  const box = document.getElementById('estado');
+  box.innerHTML = '';
+  if(tipo === 'ok'){ return; }
+
+  const f = document.createElement('div');
+  f.className = 'faixa-estado';
+
+  if(tipo === 'carregando'){
+    f.textContent = 'Buscando as provas na planilha…';
+  }else if(tipo === 'demo'){
+    f.classList.add('alerta');
+    f.innerHTML = '<span><b>Modo demonstração.</b> Os itens abaixo são exemplos — ' +
+      'cole o link CSV da planilha em <code>CSV_URL</code> para valer de verdade.</span>';
+  }else if(tipo === 'cache'){
+    f.classList.add('alerta');
+    f.innerHTML = '<span><b>Sem conexão com a planilha.</b> Mostrando a última versão salva neste aparelho.</span>' +
+      '<div class="spacer"></div>';
+    f.appendChild(botaoTentar());
+  }else if(tipo === 'ignoradas'){
+    f.classList.add('alerta');
+    f.innerHTML = '<span>' + extra + (extra === 1 ? ' linha da planilha foi ignorada' : ' linhas da planilha foram ignoradas') +
+      ' por estar sem data ou sem título.</span>';
+  }else if(tipo === 'erro'){
+    f.classList.add('ruim');
+    f.innerHTML = '<span><b>Não consegui ler a planilha</b> — ' + esc(extra) + '.</span><div class="spacer"></div>';
+    f.appendChild(botaoTentar());
+  }
+  box.appendChild(f);
+}
+function botaoTentar(){
+  const b = document.createElement('button');
+  b.textContent = 'Tentar de novo';
+  b.onclick = carregar;
+  return b;
+}
+
+/* ---------------- consultas ---------------- */
+function visiveis(){
+  return eventos.filter(e =>
+    tiposAtivos.has(e.tipo) && (!filtroMateria || e.materia === filtroMateria)
+  );
+}
+function porDia(){
+  const mapa = {};
+  for(const e of visiveis()) (mapa[e.data] = mapa[e.data] || []).push(e);
+  for(const k in mapa) mapa[k].sort((x,y) => x.tipo.localeCompare(y.tipo));
+  return mapa;
+}
+function cor(tipo){ return (TIPOS[tipo] || TIPOS.aviso).cor; }
+function rotulo(tipo){ return (TIPOS[tipo] || TIPOS.aviso).rotulo; }
+
+/* ---------------- render: barra ---------------- */
+function renderChips(){
+  const box = document.getElementById('chips');
+  box.innerHTML = '';
+  for(const par of Object.entries(TIPOS)){
+    const k = par[0], v = par[1];
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.style.setProperty('--t', v.cor);
+    b.setAttribute('aria-pressed', tiposAtivos.has(k));
+    b.innerHTML = '<span class="dot"></span>' + v.rotulo;
+    b.onclick = () => {
+      tiposAtivos.has(k) ? tiposAtivos.delete(k) : tiposAtivos.add(k);
+      if(tiposAtivos.size === 0) tiposAtivos = new Set(Object.keys(TIPOS));
+      renderTudo();
+    };
+    box.appendChild(b);
+  }
+}
+function renderMaterias(){
+  const sel = document.getElementById('filtro-materia');
+  const lista = [...new Set(eventos.map(e => e.materia).filter(Boolean))].sort((a,b) => a.localeCompare(b,'pt-BR'));
+  if(filtroMateria && lista.indexOf(filtroMateria) === -1) filtroMateria = '';
+  sel.innerHTML = '<option value="">Todas as matérias</option>' +
+    lista.map(m => '<option' + (m === filtroMateria ? ' selected' : '') + '>' + esc(m) + '</option>').join('');
+}
+
+/* ---------------- render: grade ---------------- */
+
+/* As células são quadradas, então quanto cabe depende da largura
+   da tela. O resto vira o selo "+N". */
+function limiteEventos(){
+  const l = window.innerWidth;
+  if(l <= 620) return 4;   // células pequenas: bolinhas em linha
+  if(l <= 800) return 2;
+  return 3;
+}
+
+function renderGrade(){
+  const grade = document.getElementById('grade');
+  const mapa = porDia();
+  const inicioSemana = new Date(ano, mes, 1).getDay();
+  const base = new Date(ano, mes, 1 - inicioSemana);
+  const limite = limiteEventos();
+
+  grade.innerHTML = '';
+  document.getElementById('rotulo-mes').textContent = nomeMes(ano, mes);
+
+  for(let i=0;i<42;i++){
+    const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
+    const iso = paraISO(d);
+    const doMes = d.getMonth() === mes && d.getFullYear() === ano;
+    const lista = mapa[iso] || [];
+
+    const cel = document.createElement('button');
+    cel.className = 'dia' + (doMes ? '' : ' fora') + (iso === ISO_HOJE ? ' hoje' : '');
+    cel.dataset.iso = iso;
+
+    const num = document.createElement('span');
+    num.className = 'num';
+    num.textContent = d.getDate();
+    cel.appendChild(num);
+
+    if(lista.length){
+      const box = document.createElement('div');
+      box.className = 'lista-ev';
+      lista.slice(0, limite).forEach(e => {
+        const chip = document.createElement('span');
+        chip.className = 'ev';
+        chip.style.setProperty('--t', cor(e.tipo));
+        chip.textContent = (e.materia ? e.materia + ' · ' : '') + e.titulo;
+        box.appendChild(chip);
+      });
+      cel.appendChild(box);
+
+      if(lista.length > limite){
+        const m = document.createElement('span');
+        m.className = 'mais';
+        m.textContent = '+' + (lista.length - limite);
+        cel.appendChild(m);
+      }
+    }
+
+    cel.onclick = () => abrirDia(iso);
+    grade.appendChild(cel);
+  }
+}
+
+/* ---------------- render: proximos ---------------- */
+function renderProximos(){
+  const box = document.getElementById('prox-lista');
+  const lista = visiveis()
+    .filter(e => e.data >= ISO_HOJE)
+    .sort((a,b) => a.data.localeCompare(b.data))
+    .slice(0, 7);
+
+  if(!lista.length){
+    box.innerHTML = '<div class="vazio">' +
+      (eventos.length ? 'Nada marcado por enquanto.' : 'Nenhuma prova cadastrada.') + '</div>';
+    return;
+  }
+  box.innerHTML = '';
+  for(const e of lista){
+    const dias = diasEntre(ISO_HOJE, e.data);
+    const d = deISO(e.data);
+    const quando = dias === 0 ? 'hoje' : dias === 1 ? 'amanhã' : 'em ' + dias + ' dias';
+    const b = document.createElement('button');
+    b.className = 'prox-item';
+    b.style.setProperty('--t', cor(e.tipo));
+    b.innerHTML =
+      '<span class="quando"><b>' + d.getDate() + '</b><small>' +
+        d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','') + '</small></span>' +
+      '<span class="txt"><b>' + esc(e.titulo) + '</b><small>' +
+        esc(e.materia || rotulo(e.tipo)) + ' · ' + quando + '</small></span>';
+    b.onclick = () => { irPara(e.data); abrirDia(e.data); };
+    box.appendChild(b);
+  }
+}
+
+function renderRodape(){
+  const prefixo = ano + '-' + pad(mes+1);
+  const n = eventos.filter(e => String(e.data).indexOf(prefixo) === 0).length;
+  document.getElementById('contagem').textContent =
+    n === 0 ? 'Nenhum item neste mês' : n === 1 ? '1 item neste mês' : n + ' itens neste mês';
+
+  const alvo = document.getElementById('atualizado');
+  if(!atualizadoEm){ alvo.textContent = ''; return; }
+  const min = Math.floor((Date.now() - atualizadoEm) / 60000);
+  alvo.textContent = 'Atualizado ' + (
+    min < 1 ? 'agora' :
+    min < 60 ? 'há ' + min + ' min' :
+    'em ' + new Date(atualizadoEm).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })
+  );
+}
+
+function renderTudo(){
+  renderMaterias();
+  renderChips();
+  renderGrade();
+  renderProximos();
+  renderRodape();
+}
+
+/* ---------------- navegacao ---------------- */
+function irPara(iso){
+  const d = deISO(iso);
+  ano = d.getFullYear(); mes = d.getMonth();
+  renderTudo();
+}
+function mover(passo){
+  const d = new Date(ano, mes + passo, 1);
+  ano = d.getFullYear(); mes = d.getMonth();
+  renderTudo();
+}
+
+/* ---------------- modal do dia ---------------- */
+function abrirDia(iso){
+  const lista = porDia()[iso] || [];
+  document.getElementById('dia-titulo').textContent = dataLonga(iso);
+
+  const corpo = document.getElementById('dia-corpo');
+  corpo.innerHTML = lista.length ? '' : '<div class="vazio">Nenhuma tarefa ou prova neste dia.</div>';
+
+  for(const e of lista){
+    const el = document.createElement('div');
+    el.className = 'det';
+    el.style.setProperty('--t', cor(e.tipo));
+    el.innerHTML =
+      '<span class="faixa"></span>' +
+      '<div class="info"><span class="tipo">' + rotulo(e.tipo) +
+        (e.materia ? ' · ' + esc(e.materia) : '') + '</span>' +
+      '<b>' + esc(e.titulo) + '</b>' +
+      (e.obs ? '<p>' + esc(e.obs) + '</p>' : '') + '</div>';
+    corpo.appendChild(el);
+  }
+  abrir('ov-dia');
+}
+
+/* ---------------- helpers ---------------- */
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+function abrir(id){ document.getElementById(id).classList.add('on'); }
+function fechar(id){ document.getElementById(id).classList.remove('on'); }
+
+document.querySelectorAll('[data-fechar]').forEach(b => {
+  b.onclick = () => fechar(b.dataset.fechar);
+});
+document.querySelectorAll('.overlay').forEach(o => {
+  o.onclick = ev => { if(ev.target === o) fechar(o.id); };
+});
+document.addEventListener('keydown', ev => {
+  if(ev.key === 'Escape'){
+    document.querySelectorAll('.overlay.on').forEach(o => fechar(o.id));
+    return;
+  }
+  if(document.querySelector('.overlay.on')) return;
+  if(ev.target.matches && ev.target.matches('input,select,textarea')) return;
+  if(ev.key === 'ArrowLeft')  mover(-1);
+  if(ev.key === 'ArrowRight') mover(1);
+});
+
+/* ---------------- tema ---------------- */
+const SVG_SOL =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">' +
+  '<circle cx="12" cy="12" r="4.3"/>' +
+  '<path d="M12 2.4v2.3M12 19.3v2.3M4.4 4.4l1.6 1.6M18 18l1.6 1.6M2.4 12h2.3M19.3 12h2.3M4.4 19.6l1.6-1.6M18 6l1.6-1.6"/>' +
+  '</svg>';
+const SVG_LUA =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+  '<path d="M20.4 14.5A8.6 8.6 0 0 1 9.5 3.6a8.6 8.6 0 1 0 10.9 10.9z"/>' +
+  '</svg>';
+const SVG_AUTO =
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+  '<circle cx="12" cy="12" r="8.6"/>' +
+  '<path d="M12 3.4a8.6 8.6 0 0 0 0 17.2z" fill="currentColor" stroke="none"/>' +
+  '</svg>';
+
+const MODOS_TEMA = [
+  { id:'auto',  svg:SVG_AUTO, texto:'Auto',   proximo:'o modo claro'      },
+  { id:'light', svg:SVG_SOL,  texto:'Claro',  proximo:'o modo escuro'     },
+  { id:'dark',  svg:SVG_LUA,  texto:'Escuro', proximo:'o modo automático' }
+];
+
+function aplicarTema(id){
+  const i = Math.max(0, MODOS_TEMA.findIndex(m => m.id === id));
+  const modo = MODOS_TEMA[i];
+  document.documentElement.setAttribute('data-theme', modo.id);
+  try{ localStorage.setItem(CHAVE_TEMA, modo.id); }catch(e){}
+
+  const icone = document.getElementById('tema-icone');
+  const txt   = document.getElementById('tema-txt');
+  const btn   = document.getElementById('btn-tema');
+  if(icone) icone.innerHTML = modo.svg;
+  if(txt)   txt.textContent = modo.texto;
+  if(btn){
+    const dica = 'Tema: ' + modo.texto.toLowerCase() + ' — clique para usar ' + modo.proximo;
+    btn.title = dica;
+    btn.setAttribute('aria-label', dica);
+  }
+}
+
+let temaSalvo = 'auto';
+try{ temaSalvo = localStorage.getItem(CHAVE_TEMA) || 'auto'; }catch(e){}
+aplicarTema(temaSalvo);
+
+document.getElementById('btn-tema').onclick = () => {
+  const atual = document.documentElement.getAttribute('data-theme') || 'auto';
+  const i = Math.max(0, MODOS_TEMA.findIndex(m => m.id === atual));
+  aplicarTema(MODOS_TEMA[(i + 1) % MODOS_TEMA.length].id);
+};
+
+/* ---------------- ligacoes ---------------- */
+document.getElementById('ant').onclick  = () => mover(-1);
+document.getElementById('prox').onclick = () => mover(1);
+document.getElementById('btn-hoje').onclick = () => {
+  ano = hoje.getFullYear(); mes = hoje.getMonth(); renderTudo();
+};
+document.getElementById('filtro-materia').onchange = function(){
+  filtroMateria = this.value; renderTudo();
+};
+document.getElementById('btn-recarregar').onclick = () => { if(!carregando) carregar(); };
+
+let larguraAnterior = window.innerWidth;
+let limiteAnterior = limiteEventos();
+window.addEventListener('resize', () => {
+  const novoLimite = limiteEventos();
+  if(novoLimite === limiteAnterior && Math.abs(window.innerWidth - larguraAnterior) < 40) return;
+  limiteAnterior = novoLimite;
+  larguraAnterior = window.innerWidth;
+  renderGrade();
+});
+
+/* Quem deixa a aba aberta o dia todo recebe o que mudou ao voltar. */
+document.addEventListener('visibilitychange', () => {
+  if(!document.hidden && CSV_URL && Date.now() - atualizadoEm > 300000) carregar();
+});
+
+renderTudo();
+carregar();
+</script>
+</body>
+</html>
