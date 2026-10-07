@@ -9,7 +9,7 @@
   --bg:#f4f6f9; --surface:#ffffff; --surface-2:#eef1f6; --border:#dfe4ec;
   --text:#121620; --dim:#6a7382; --accent:#4f46e5;
   /* cores de estado da interface — reservadas, nunca usadas para matéria */
-  --prova:#dc2626; --trabalho:#2563eb; --entrega:#d97706; --outro:#0d9488;
+  --erro:#dc2626; --alerta:#d97706; --ok:#0d9488;
   --shadow:0 1px 2px rgba(18,22,32,.06), 0 8px 24px rgba(18,22,32,.07);
   --radius:14px;
 
@@ -26,7 +26,7 @@
   :root:not([data-theme="light"]){
     --bg:#0e1117; --surface:#171b23; --surface-2:#1f242e; --border:#2a3140;
     --text:#e9edf4; --dim:#98a2b3; --accent:#8b85f8;
-    --prova:#f87171; --trabalho:#60a5fa; --entrega:#fbbf24; --outro:#2dd4bf;
+    --erro:#f87171; --alerta:#fbbf24; --ok:#2dd4bf;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
 
     --m0:#98a2b3;
@@ -38,7 +38,7 @@
 :root[data-theme="dark"]{
   --bg:#0e1117; --surface:#171b23; --surface-2:#1f242e; --border:#2a3140;
   --text:#e9edf4; --dim:#98a2b3; --accent:#8b85f8;
-  --prova:#f87171; --trabalho:#60a5fa; --entrega:#fbbf24; --outro:#2dd4bf;
+  --erro:#f87171; --alerta:#fbbf24; --ok:#2dd4bf;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.35);
 
   --m0:#98a2b3;
@@ -131,12 +131,12 @@ select{
 }
 .faixa-estado b{font-weight:700}
 .faixa-estado.alerta{
-  background:color-mix(in srgb, var(--entrega) 13%, transparent);
-  border-color:color-mix(in srgb, var(--entrega) 32%, transparent);
+  background:color-mix(in srgb, var(--alerta) 13%, transparent);
+  border-color:color-mix(in srgb, var(--alerta) 32%, transparent);
 }
 .faixa-estado.ruim{
-  background:color-mix(in srgb, var(--prova) 11%, transparent);
-  border-color:color-mix(in srgb, var(--prova) 30%, transparent);
+  background:color-mix(in srgb, var(--erro) 11%, transparent);
+  border-color:color-mix(in srgb, var(--erro) 30%, transparent);
 }
 .faixa-estado .spacer{flex:1}
 .faixa-estado button{
@@ -264,7 +264,7 @@ select{
 .btn:hover:not([disabled]){background:var(--surface-2)}
 .btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.pri:hover:not([disabled]){filter:brightness(1.08)}
-.btn.perigo{color:var(--prova);border-color:color-mix(in srgb, var(--prova) 40%, var(--border))}
+.btn.perigo{color:var(--erro);border-color:color-mix(in srgb, var(--erro) 40%, var(--border))}
 
 .det{display:flex;gap:11px;padding:11px;border-radius:11px;background:var(--surface-2);margin-bottom:9px}
 .det .faixa{width:3px;border-radius:2px;background:var(--t);flex:0 0 3px}
@@ -287,13 +287,13 @@ label{display:block;font-size:12.5px;font-weight:650;color:var(--dim);margin:0 0
 
 .aviso{
   font-size:12.5px;padding:10px 12px;border-radius:10px;margin-bottom:14px;
-  background:color-mix(in srgb, var(--entrega) 14%, transparent);
-  color:color-mix(in srgb, var(--entrega) 78%, var(--text));
-  border:1px solid color-mix(in srgb, var(--entrega) 30%, transparent);
+  background:color-mix(in srgb, var(--alerta) 14%, transparent);
+  color:color-mix(in srgb, var(--alerta) 78%, var(--text));
+  border:1px solid color-mix(in srgb, var(--alerta) 30%, transparent);
 }
 .recado{font-size:12.5px;min-height:17px;margin:-6px 0 12px}
-.recado.erro{color:var(--prova)}
-.recado.ok{color:var(--outro)}
+.recado.erro{color:var(--erro)}
+.recado.ok{color:var(--ok)}
 
 .badge-edit{
   position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
@@ -417,13 +417,13 @@ const CHAVE_SENHA = 'calendario-1anoa/senha';
 const TIPOS = {
   prova:    { rotulo:'Prova'    },
   trabalho: { rotulo:'Trabalho' },
-  entrega:  { rotulo:'Entrega'  },
+  tarefa:   { rotulo:'Tarefa'   },
   aviso:    { rotulo:'Aviso'    }
 };
 
 /* Usados só enquanto API_URL estiver vazio. */
 const EXEMPLOS = [
-  { id:'ex1', data:'2026-10-09', tipo:'entrega',  materia:'Português',  titulo:'Entrega da resenha',     obs:'Mínimo 2 páginas, impressa.' },
+  { id:'ex1', data:'2026-10-09', tipo:'tarefa',   materia:'Português',  titulo:'Entrega da resenha',     obs:'Mínimo 2 páginas, impressa.' },
   { id:'ex2', data:'2026-10-14', tipo:'prova',    materia:'Física',     titulo:'P2 — Cinemática',        obs:'Capítulos 3 e 4.' },
   { id:'ex3', data:'2026-10-14', tipo:'trabalho', materia:'História',   titulo:'Apresentação em grupo',  obs:'Grupos de 4.' },
   { id:'ex4', data:'2026-10-21', tipo:'prova',    materia:'Matemática', titulo:'Prova de funções',       obs:'' },
@@ -470,7 +470,9 @@ function normalizarTipo(v){
   const tem = alvos => alvos.some(a => k.indexOf(a) >= 0);
   if(tem(['prova','teste','avaliacao','simulado','exame','recupera'])) return 'prova';
   if(tem(['trabalho','apresenta','seminario','projeto','maquete'])) return 'trabalho';
-  if(tem(['entrega','tarefa','licao','dever','prazo','exercicio','redacao'])) return 'entrega';
+  /* "entrega" continua na lista de busca: linhas antigas da planilha
+     usavam esse nome e precisam seguir caindo em Tarefa. */
+  if(tem(['tarefa','entrega','licao','dever','prazo','exercicio','redacao'])) return 'tarefa';
   return 'aviso';
 }
 

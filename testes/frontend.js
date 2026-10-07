@@ -88,9 +88,10 @@ ok('Recuperacao',       M.normalizarTipo('Recuperação'), 'prova');
 ok('trabalho em grupo', M.normalizarTipo('trabalho em grupo'), 'trabalho');
 ok('Apresentacao',      M.normalizarTipo('Apresentação'), 'trabalho');
 ok('Seminario',         M.normalizarTipo('Seminário'), 'trabalho');
-ok('licao de casa',     M.normalizarTipo('Lição de casa'), 'entrega');
-ok('Redacao',           M.normalizarTipo('Redação'), 'entrega');
-ok('Prazo final',       M.normalizarTipo('Prazo final'), 'entrega');
+ok('licao de casa',     M.normalizarTipo('Lição de casa'), 'tarefa');
+ok('Redacao',           M.normalizarTipo('Redação'), 'tarefa');
+ok('Prazo final',       M.normalizarTipo('Prazo final'), 'tarefa');
+ok('dado antigo "entrega"', M.normalizarTipo('Entrega'), 'tarefa');
 ok('vazio -> aviso',    M.normalizarTipo(''), 'aviso');
 ok('desconhecido',      M.normalizarTipo('passeio'), 'aviso');
 
@@ -100,7 +101,7 @@ ok('preenche o que falta', M.normalizarEvento({ data: '2026-10-14', titulo: 'P2'
 ok('aguenta null', M.normalizarEvento(null),
   { id: '', data: '', tipo: 'aviso', materia: '', titulo: '', obs: '' });
 ok('tira espacos', M.normalizarEvento({ titulo: '  P2  ', materia: ' Física ' }).titulo, 'P2');
-ok('tipo normalizado', M.normalizarEvento({ tipo: 'Lição de casa' }).tipo, 'entrega');
+ok('tipo normalizado', M.normalizarEvento({ tipo: 'Lição de casa' }).tipo, 'tarefa');
 
 console.log('\n== cor por materia ==');
 ok('mesmo nome, mesma cor',

@@ -1,6 +1,6 @@
 # Calendário — 1º Ano A
 
-Calendário de provas, trabalhos e entregas da turma. A turma abre o link e
+Calendário de provas, trabalhos e tarefas da turma. A turma abre o link e
 consulta; só quem tem a senha adiciona, edita ou remove.
 
 **Site:** https://calendariotarefas.github.io/
@@ -42,7 +42,7 @@ Dá para editar direto na planilha também, se preferir. As colunas são
 `id | data | tipo | materia | titulo | obs`; deixe o `id` em branco apenas se for
 mexer por lá (itens sem `data` ou sem `titulo` são ignorados).
 
-Nos tipos, a busca é por pedaço da palavra: "Lição de casa" cai em *entrega*,
+Nos tipos, a busca é por pedaço da palavra: "Lição de casa" cai em *tarefa*,
 "trabalho em grupo" em *trabalho*, "Avaliação" em *prova*. O que não casa com
 nada vira *aviso*.
 
