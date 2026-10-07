@@ -1,54 +1,81 @@
 # Calendário — 1º Ano A
 
-Calendário de provas, trabalhos e entregas da turma. Página única, estática,
-somente leitura: quem abre o link só consulta.
+Calendário de provas, trabalhos e entregas da turma. A turma abre o link e
+consulta; só quem tem a senha adiciona, edita ou remove.
 
-**Site:** _(preencher com o link do GitHub Pages)_
+**Site:** https://gabriel-dio.github.io/calendario-da-sala/
 
-## Como adicionar uma prova
+## Como funciona
 
-Tudo vive na planilha do Google — o site só a lê. Não é preciso mexer no código
-nem republicar nada: edite a planilha e o site mostra na próxima vez que alguém
-abrir (ou ao clicar no ⟳).
+```
+Navegador da turma  ──GET──▶  Apps Script  ──▶ lê a planilha        (aberto)
+Painel de edição    ──POST─▶  Apps Script  ──▶ confere a senha lá
+                                          ──▶ escreve na planilha   (protegido)
+```
 
-Colunas da planilha (a ordem não importa; acentos e maiúsculas no cabeçalho são
-ignorados):
+São três peças:
 
-| coluna    | obrigatória | exemplo                        |
-|-----------|-------------|--------------------------------|
-| `data`    | sim         | `14/10/2026` ou `2026-10-14`   |
-| `tipo`    | não         | `prova`, `trabalho`, `entrega`, `aviso` |
-| `materia` | não         | `Física`                       |
-| `titulo`  | sim         | `P2 — Cinemática`              |
-| `obs`     | não         | `Capítulos 3 e 4`              |
+| peça | onde roda | papel |
+|---|---|---|
+| `index.html` | navegador de quem abre | mostra o calendário e o painel |
+| `apps-script.gs` | servidores do Google | guarda a senha e fala com a planilha |
+| planilha | Google Drive | onde os dados realmente ficam |
 
-Linhas sem `data` ou sem `titulo` são ignoradas, e a página avisa quantas foram.
+A senha fica **no Apps Script**, não no site. Quem abrir o código-fonte da
+página vê apenas o endereço do script — e sem a senha não escreve nada. É a
+diferença entre uma senha de verdade e uma senha decorativa: num site estático
+puro, qualquer verificação feita no navegador pode ser contornada por quem lê o
+código.
 
-No `tipo`, a busca é por pedaço da palavra: "Lição de casa" cai em *entrega*,
+A planilha não precisa ser publicada nem compartilhada: o script a acessa em seu
+nome. Ela continua privada.
+
+## Editar o calendário
+
+Pela engrenagem discreta no canto direito da barra (ou acrescentando `#admin` ao
+final do link). Digite a senha e aparecem os botões de adicionar, editar e
+excluir — tanto no painel quanto dentro de cada dia.
+
+A senha fica guardada só enquanto a aba estiver aberta. Fechou, pede de novo.
+
+Dá para editar direto na planilha também, se preferir. As colunas são
+`id | data | tipo | materia | titulo | obs`; deixe o `id` em branco apenas se for
+mexer por lá (itens sem `data` ou sem `titulo` são ignorados).
+
+Nos tipos, a busca é por pedaço da palavra: "Lição de casa" cai em *entrega*,
 "trabalho em grupo" em *trabalho*, "Avaliação" em *prova*. O que não casa com
 nada vira *aviso*.
 
-## Configuração
+## Instalação
 
-O único ajuste fica em `index.html`:
+1. Crie uma planilha no Google Drive.
+2. Nela: **Extensões → Apps Script**. Apague o `Code.gs` e cole o
+   `apps-script.gs` deste repositório.
+3. Troque o valor de `SENHA` no topo do arquivo.
+4. **Implantar → Nova implantação → App da Web**, executando como **Eu**, com
+   acesso para **Qualquer pessoa**. Autorize quando o Google pedir.
+5. Copie a URL que termina em `/exec` e cole em `API_URL`, no `index.html`.
 
-```js
-const CSV_URL = '';   // link CSV publicado da planilha
-```
-
-Para gerar esse link: na planilha, **Arquivo → Compartilhar → Publicar na web →
-escolher a aba → "Valores separados por vírgula (.csv)" → Publicar**.
-
-Isso publica apenas o conteúdo daquela aba como CSV. A planilha continua privada
-para edição.
+Ao alterar o Apps Script depois, use **Implantar → Gerenciar implantações →
+editar → Versão: Nova versão**, senão o site continua usando a versão antiga.
 
 ## Detalhes
 
-- Sem dependências, sem build: um arquivo HTML.
-- A última leitura boa da planilha fica em cache no navegador de cada visitante,
-  então o calendário abre mesmo sem internet ou com o Google fora do ar — nesse
-  caso com um aviso de que está desatualizado.
+- Sem dependências e sem build: um arquivo HTML.
+- A última leitura boa fica em cache no navegador de cada visitante, então o
+  calendário abre sem internet — com aviso de que está desatualizado.
+- Escritas usam `LockService`, para dois cadastros ao mesmo tempo não se
+  sobrescreverem.
+- Senha errada leva 1,2s para responder, o que encarece tentar adivinhar.
 - Tema claro/escuro/automático, lembrado por aparelho.
 - Abrindo o arquivo direto do disco (`file://`), o navegador pode bloquear a
-  leitura da planilha. O ambiente válido para teste é o site publicado ou um
-  servidor local.
+  conversa com o Apps Script. O ambiente válido para teste é o site publicado.
+
+## Testes
+
+Os dois lados têm suíte de teste em `testes/`:
+
+```
+node testes/backend.js    # roda o apps-script.gs contra um Sheets falso
+node testes/frontend.js   # datas, tipos e normalização da página
+```

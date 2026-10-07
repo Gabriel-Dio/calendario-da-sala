@@ -36,6 +36,7 @@ body{
 }
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
+button[disabled]{opacity:.55;cursor:default}
 
 .wrap{max-width:1120px;margin:0 auto;padding:18px 16px 48px}
 
@@ -71,7 +72,6 @@ select{
   padding:7px 10px;font-size:13px;max-width:170px;
 }
 
-/* botao de recarregar */
 .icone-acao{
   background:transparent;border:1px solid var(--border);border-radius:9px;
   width:34px;height:34px;display:grid;place-items:center;
@@ -91,6 +91,9 @@ select{
 .tema svg{width:16px;height:16px;display:block;flex:0 0 16px}
 .tema-txt{color:var(--dim)}
 
+.gear{background:none;border:none;color:var(--text);opacity:.25;font-size:15px;padding:4px 6px}
+.gear:hover{opacity:.85}
+
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{
   border:1px solid var(--border);background:transparent;border-radius:999px;
@@ -100,7 +103,7 @@ select{
 .chip[aria-pressed="true"]{opacity:1;background:var(--surface-2)}
 .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--t)}
 
-/* ---------- faixa de estado (carregando / erro / demo) ---------- */
+/* ---------- faixa de estado ---------- */
 #estado:empty{display:none}
 .faixa-estado{
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;
@@ -197,7 +200,7 @@ select{
 .pe{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px;color:var(--dim);font-size:12.5px}
 .pe .spacer{flex:1}
 
-/* ---------- barra em telas estreitas ---------- */
+/* ---------- telas estreitas ---------- */
 @media (max-width:620px){
   .bar{padding:9px 10px;gap:8px}
   .bar-linha{gap:7px}
@@ -218,7 +221,7 @@ select{
   .mais{top:3px;right:3px;font-size:9px;padding:0 3px;background:transparent}
 }
 
-/* ---------- modal do dia ---------- */
+/* ---------- modais ---------- */
 .overlay{
   position:fixed;inset:0;background:rgba(10,12,18,.5);backdrop-filter:blur(3px);
   display:none;place-items:center;padding:16px;z-index:50;
@@ -237,10 +240,13 @@ select{
 .modal .corpo{padding:16px 18px;overflow:auto}
 .modal footer{
   display:flex;gap:8px;justify-content:flex-end;padding:13px 18px;
-  border-top:1px solid var(--border);background:var(--surface-2);
+  border-top:1px solid var(--border);background:var(--surface-2);flex-wrap:wrap;
 }
 .btn{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:600}
-.btn:hover{background:var(--surface-2)}
+.btn:hover:not([disabled]){background:var(--surface-2)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.pri:hover:not([disabled]){filter:brightness(1.08)}
+.btn.perigo{color:var(--prova);border-color:color-mix(in srgb, var(--prova) 40%, var(--border))}
 
 .det{display:flex;gap:11px;padding:11px;border-radius:11px;background:var(--surface-2);margin-bottom:9px}
 .det .faixa{width:3px;border-radius:2px;background:var(--t);flex:0 0 3px}
@@ -248,6 +254,45 @@ select{
 .det .tipo{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--t)}
 .det .info b{display:block;font-size:14.5px;margin:2px 0}
 .det .info p{margin:3px 0 0;font-size:13px;color:var(--dim);white-space:pre-wrap}
+.det .acoes{display:flex;flex-direction:column;gap:4px}
+.det .acoes button{background:none;border:1px solid var(--border);border-radius:7px;padding:3px 7px;font-size:11.5px}
+
+label{display:block;font-size:12.5px;font-weight:650;color:var(--dim);margin:0 0 5px}
+.campo{margin-bottom:13px}
+.campo input,.campo select,.campo textarea{
+  width:100%;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:10px;padding:9px 11px;font-size:14px;max-width:none;
+}
+.campo textarea{resize:vertical;min-height:62px}
+.dupla{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+@media (max-width:460px){ .dupla{grid-template-columns:1fr} }
+
+.aviso{
+  font-size:12.5px;padding:10px 12px;border-radius:10px;margin-bottom:14px;
+  background:color-mix(in srgb, var(--entrega) 14%, transparent);
+  color:color-mix(in srgb, var(--entrega) 78%, var(--text));
+  border:1px solid color-mix(in srgb, var(--entrega) 30%, transparent);
+}
+.recado{font-size:12.5px;min-height:17px;margin:-6px 0 12px}
+.recado.erro{color:var(--prova)}
+.recado.ok{color:var(--outro)}
+
+.badge-edit{
+  position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
+  background:var(--accent);color:#fff;border-radius:999px;padding:8px 16px;
+  font-size:12.5px;font-weight:700;box-shadow:var(--shadow);z-index:40;
+  display:none;align-items:center;gap:10px;
+}
+.badge-edit.on{display:flex}
+.badge-edit button{background:rgba(255,255,255,.22);border:none;color:#fff;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:700}
+
+.lista-adm{display:flex;flex-direction:column;gap:7px}
+.lin{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--border);border-radius:10px;font-size:13px}
+.lin .d{flex:0 0 60px;color:var(--dim);font-size:12px;font-weight:600}
+.lin .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lin .t i{color:var(--t);font-style:normal;font-weight:700}
+.lin button{background:none;border:none;color:var(--dim);font-size:13px;padding:2px 5px}
+.lin button:hover{color:var(--text)}
 </style>
 </head>
 <body>
@@ -265,7 +310,7 @@ select{
       <button class="btn-hoje" id="btn-hoje">Hoje</button>
       <div class="spacer"></div>
       <select id="filtro-materia"><option value="">Todas as matérias</option></select>
-      <button class="icone-acao" id="btn-recarregar" title="Buscar atualizações na planilha" aria-label="Atualizar">
+      <button class="icone-acao" id="btn-recarregar" title="Buscar atualizações" aria-label="Atualizar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20.5 3.5V10h-6.5"/>
         </svg>
@@ -274,6 +319,7 @@ select{
         <span class="tema-icone" id="tema-icone"></span>
         <span class="tema-txt" id="tema-txt"></span>
       </button>
+      <button class="gear" id="btn-admin" title="Área de edição" aria-label="Área de edição">&#9881;</button>
     </div>
     <div class="chips" id="chips"></div>
   </div>
@@ -301,11 +347,25 @@ select{
   </div>
 </div>
 
+<div class="badge-edit" id="badge">
+  Modo edição
+  <button id="btn-painel">Painel</button>
+  <button id="btn-sair">Sair</button>
+</div>
+
 <div class="overlay" id="ov-dia">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="dia-titulo">
     <header><h3 id="dia-titulo"></h3><button data-fechar="ov-dia" aria-label="Fechar">&times;</button></header>
     <div class="corpo" id="dia-corpo"></div>
-    <footer><button class="btn" data-fechar="ov-dia">Fechar</button></footer>
+    <footer id="dia-pe"></footer>
+  </div>
+</div>
+
+<div class="overlay" id="ov-adm">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="adm-titulo">
+    <header><h3 id="adm-titulo">Área de edição</h3><button data-fechar="ov-adm" aria-label="Fechar">&times;</button></header>
+    <div class="corpo" id="adm-corpo"></div>
+    <footer id="adm-pe"></footer>
   </div>
 </div>
 
@@ -313,28 +373,28 @@ select{
 /* ============================================================
    Calendário do 1º Ano A
 
-   A planilha do Google é a única fonte dos dados. A página só lê:
-   ninguém que abrir o site consegue alterar nada, nem pelo
-   navegador. Para mudar o calendário, muda-se a planilha.
+   Os dados vivem numa planilha do Google. O site conversa com um
+   Apps Script (ver apps-script.gs) que roda nos servidores do
+   Google:
+
+     leitura  GET  -> aberta, é o que a turma usa
+     escrita  POST -> exige a senha, conferida LÁ, não aqui
+
+   Por isso a senha não aparece neste arquivo: quem ler o código
+   da página vê apenas o endereço do script.
    ============================================================ */
 
 /* ------------------------------------------------------------
-   CONFIGURAÇÃO — cole aqui o link CSV publicado da planilha.
-   Na planilha: Arquivo > Compartilhar > Publicar na web >
-   aba desejada > "Valores separados por vírgula (.csv)" >
-   Publicar. Copie o link gerado e cole abaixo.
-
-   Colunas esperadas (a primeira linha é o cabeçalho; a ordem
-   não importa e maiúsculas/acentos são ignorados):
-   data | tipo | materia | titulo | obs
+   CONFIGURAÇÃO — cole aqui a "URL do app da Web" do Apps Script
+   (termina em /exec). O passo a passo está em apps-script.gs.
    ------------------------------------------------------------ */
-const CSV_URL = '';
+const API_URL = '';
 
-/* Quanto tempo esperar pela planilha antes de desistir (ms). */
-const TIMEOUT = 12000;
+const TIMEOUT = 15000;
 
 const CHAVE_TEMA  = 'calendario-1anoa/tema';
 const CHAVE_CACHE = 'calendario-1anoa/cache';
+const CHAVE_SENHA = 'calendario-1anoa/senha';
 
 const TIPOS = {
   prova:    { rotulo:'Prova',    cor:'var(--prova)'    },
@@ -343,16 +403,15 @@ const TIPOS = {
   aviso:    { rotulo:'Aviso',    cor:'var(--outro)'    }
 };
 
-/* Usados só enquanto CSV_URL estiver vazio, para a página ter o
-   que mostrar enquanto você monta a planilha. */
+/* Usados só enquanto API_URL estiver vazio. */
 const EXEMPLOS = [
-  { data:'2026-10-09', tipo:'entrega',  materia:'Português',  titulo:'Entrega da resenha',     obs:'Mínimo 2 páginas, impressa.' },
-  { data:'2026-10-14', tipo:'prova',    materia:'Física',     titulo:'P2 — Cinemática',        obs:'Capítulos 3 e 4. Pode levar calculadora.' },
-  { data:'2026-10-14', tipo:'trabalho', materia:'História',   titulo:'Apresentação em grupo',  obs:'Grupos de 4, 10 min cada.' },
-  { data:'2026-10-21', tipo:'prova',    materia:'Matemática', titulo:'Prova de funções',       obs:'' },
-  { data:'2026-10-28', tipo:'trabalho', materia:'Biologia',   titulo:'Maquete da célula',      obs:'Material livre.' },
-  { data:'2026-11-05', tipo:'prova',    materia:'Química',    titulo:'P3 — Ligações químicas', obs:'' },
-  { data:'2026-11-11', tipo:'aviso',    materia:'Geral',      titulo:'Conselho de classe',     obs:'Sem aula no período da tarde.' }
+  { id:'ex1', data:'2026-10-09', tipo:'entrega',  materia:'Português',  titulo:'Entrega da resenha',     obs:'Mínimo 2 páginas, impressa.' },
+  { id:'ex2', data:'2026-10-14', tipo:'prova',    materia:'Física',     titulo:'P2 — Cinemática',        obs:'Capítulos 3 e 4.' },
+  { id:'ex3', data:'2026-10-14', tipo:'trabalho', materia:'História',   titulo:'Apresentação em grupo',  obs:'Grupos de 4.' },
+  { id:'ex4', data:'2026-10-21', tipo:'prova',    materia:'Matemática', titulo:'Prova de funções',       obs:'' },
+  { id:'ex5', data:'2026-10-28', tipo:'trabalho', materia:'Biologia',   titulo:'Maquete da célula',      obs:'Material livre.' },
+  { id:'ex6', data:'2026-11-05', tipo:'prova',    materia:'Química',    titulo:'P3 — Ligações químicas', obs:'' },
+  { id:'ex7', data:'2026-11-11', tipo:'aviso',    materia:'Geral',      titulo:'Conselho de classe',     obs:'Sem aula à tarde.' }
 ];
 
 /* ---------------- estado ---------------- */
@@ -365,6 +424,8 @@ let filtroMateria = '';
 let tiposAtivos = new Set(Object.keys(TIPOS));
 let carregando = false;
 let atualizadoEm = 0;
+let senha = '';
+try{ senha = sessionStorage.getItem(CHAVE_SENHA) || ''; }catch(e){}
 
 /* ---------------- datas ---------------- */
 function pad(n){ return String(n).padStart(2,'0'); }
@@ -377,69 +438,15 @@ function diasEntre(isoA, isoB){ return Math.round((deISO(isoB) - deISO(isoA)) / 
 function nomeMes(a, m){ return new Date(a, m, 1).toLocaleDateString('pt-BR', { month:'long', year:'numeric' }); }
 function dataLonga(iso){ return deISO(iso).toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' }); }
 
-/* ---------------- leitura do CSV ----------------
-   Parser completo: aceita campos entre aspas com vírgula e
-   quebra de linha dentro (observações longas funcionam). */
-function lerCSV(txt){
-  const linhas = [];
-  let linha = [], campo = '', dentro = false;
-  txt = String(txt).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-
-  for(let i=0;i<txt.length;i++){
-    const c = txt[i];
-    if(dentro){
-      if(c === '"'){
-        if(txt[i+1] === '"'){ campo += '"'; i++; }
-        else dentro = false;
-      }else campo += c;
-    }else{
-      if(c === '"') dentro = true;
-      else if(c === ','){ linha.push(campo); campo = ''; }
-      else if(c === '\n'){ linha.push(campo); linhas.push(linha); linha = []; campo = ''; }
-      else campo += c;
-    }
-  }
-  if(campo.length || linha.length){ linha.push(campo); linhas.push(linha); }
-  return linhas;
-}
-
-/* "Matéria" -> "materia", "Observações" -> "observacoes" */
+/* ---------------- normalizacao ---------------- */
 function chave(s){
   return String(s == null ? '' : s).trim().toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]/g, '');
 }
 
-/* Aceita vários nomes de coluna, para a planilha não precisar
-   usar exatamente as minhas palavras. */
-const COLUNAS = {
-  data:'data', dia:'data', quando:'data', datas:'data',
-  tipo:'tipo', categoria:'tipo', oque:'tipo',
-  materia:'materia', disciplina:'materia', materias:'materia',
-  titulo:'titulo', assunto:'titulo', nome:'titulo', descricao:'titulo',
-  obs:'obs', obs1:'obs', observacao:'obs', observacoes:'obs',
-  detalhes:'obs', conteudo:'obs', anotacoes:'obs'
-};
-
-function normalizarData(v){
-  const s = String(v == null ? '' : v).trim();
-  if(!s) return '';
-  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);              // 2026-10-14 (e ISO com hora)
-  if(m) return m[1] + '-' + pad(m[2]) + '-' + pad(m[3]);
-  m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);   // 14/10/2026 ou 14/10/26
-  if(m){
-    let a = Number(m[3]);
-    if(a < 100) a += 2000;
-    return a + '-' + pad(m[2]) + '-' + pad(m[1]);
-  }
-  m = s.match(/^(\d{1,2})[\/.\-](\d{1,2})$/);                   // 14/10 -> assume o ano atual
-  if(m) return hoje.getFullYear() + '-' + pad(m[2]) + '-' + pad(m[1]);
-  return '';
-}
-
 /* Busca por pedaço, não por igualdade: na planilha as pessoas
-   escrevem "lição de casa" ou "trabalho em grupo", não a palavra
-   exata que o código espera. */
+   escrevem "lição de casa", não a palavra exata do código. */
 function normalizarTipo(v){
   const k = chave(v);
   if(!k) return 'aviso';
@@ -450,40 +457,19 @@ function normalizarTipo(v){
   return 'aviso';
 }
 
-function csvParaEventos(txt){
-  const linhas = lerCSV(txt).filter(l => l.some(c => String(c).trim() !== ''));
-  if(!linhas.length) return { lista: [], descartadas: 0 };
-
-  const cabecalho = linhas[0].map(c => COLUNAS[chave(c)] || null);
-  const temCabecalho = cabecalho.some(c => c !== null);
-  const corpo = temCabecalho ? linhas.slice(1) : linhas;
-  /* sem cabeçalho reconhecido, assume a ordem documentada */
-  const mapa = temCabecalho ? cabecalho : ['data','tipo','materia','titulo','obs'];
-
-  const fora = [];
-  const lista = [];
-  for(const l of corpo){
-    const reg = {};
-    mapa.forEach((campo, i) => { if(campo) reg[campo] = l[i]; });
-
-    const data = normalizarData(reg.data);
-    const titulo = String(reg.titulo == null ? '' : reg.titulo).trim();
-    if(!data || !titulo){ fora.push(l.join(',')); continue; }
-
-    lista.push({
-      data: data,
-      tipo: normalizarTipo(reg.tipo),
-      materia: String(reg.materia == null ? '' : reg.materia).trim(),
-      titulo: titulo,
-      obs: String(reg.obs == null ? '' : reg.obs).trim()
-    });
-  }
-  return { lista: lista, descartadas: fora.length };
+function normalizarEvento(e){
+  return {
+    id: String(e && e.id || ''),
+    data: String(e && e.data || ''),
+    tipo: normalizarTipo(e && e.tipo),
+    materia: String(e && e.materia || '').trim(),
+    titulo: String(e && e.titulo || '').trim(),
+    obs: String(e && e.obs || '').trim()
+  };
 }
 
 /* ---------------- cache local ----------------
-   Guarda a última leitura boa da planilha. Se o Google estiver
-   fora do ar ou a pessoa sem internet, o calendário ainda abre. */
+   Só para a página abrir sem internet. Nunca é fonte de verdade. */
 function salvarCache(lista){
   try{ localStorage.setItem(CHAVE_CACHE, JSON.stringify({ em:Date.now(), lista:lista })); }catch(e){}
 }
@@ -495,10 +481,14 @@ function lerCache(){
   return null;
 }
 
-/* ---------------- carregamento ---------------- */
+/* ---------------- conversa com o Apps Script ---------------- */
+function comTimeout(){
+  return AbortSignal.timeout ? AbortSignal.timeout(TIMEOUT) : undefined;
+}
+
 async function carregar(){
-  if(!CSV_URL){
-    eventos = EXEMPLOS.slice();
+  if(!API_URL){
+    eventos = EXEMPLOS.map(normalizarEvento);
     mostrarEstado('demo');
     renderTudo();
     return;
@@ -509,24 +499,21 @@ async function carregar(){
   if(!eventos.length) mostrarEstado('carregando');
 
   try{
-    const sep = CSV_URL.indexOf('?') >= 0 ? '&' : '?';
-    const resp = await fetch(CSV_URL + sep + 'cb=' + Date.now(), {
-      cache: 'no-store',
-      signal: AbortSignal.timeout ? AbortSignal.timeout(TIMEOUT) : undefined
-    });
-    if(!resp.ok) throw new Error('a planilha respondeu ' + resp.status);
+    const sep = API_URL.indexOf('?') >= 0 ? '&' : '?';
+    const resp = await fetch(API_URL + sep + 'cb=' + Date.now(), { cache:'no-store', signal:comTimeout() });
+    if(!resp.ok) throw new Error('o script respondeu ' + resp.status);
 
-    const res = csvParaEventos(await resp.text());
-    if(!res.lista.length) throw new Error('nenhuma linha válida na planilha');
+    const dados = await resp.json();
+    if(!dados.ok) throw new Error(dados.erro || 'o script recusou a leitura');
 
-    eventos = res.lista;
+    eventos = (dados.eventos || []).map(normalizarEvento).filter(e => e.data && e.titulo);
     atualizadoEm = Date.now();
-    salvarCache(res.lista);
-    mostrarEstado(res.descartadas ? 'ignoradas' : 'ok', res.descartadas);
+    salvarCache(eventos);
+    mostrarEstado('ok');
   }catch(e){
     const c = lerCache();
     if(c){
-      eventos = c.lista;
+      eventos = c.lista.map(normalizarEvento);
       atualizadoEm = c.em;
       mostrarEstado('cache');
     }else{
@@ -540,32 +527,52 @@ async function carregar(){
   }
 }
 
+/* Content-Type text/plain de propósito: evita a requisição OPTIONS
+   de preflight, que o Apps Script não responde. */
+async function enviar(payload){
+  if(!API_URL) throw new Error('API_URL não configurada');
+  const resp = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type':'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload),
+    signal: comTimeout()
+  });
+  if(!resp.ok) throw new Error('o script respondeu ' + resp.status);
+
+  const dados = await resp.json();
+  if(!dados.ok) throw new Error(dados.erro || 'a operação falhou');
+
+  if(dados.eventos){
+    eventos = dados.eventos.map(normalizarEvento).filter(e => e.data && e.titulo);
+    atualizadoEm = Date.now();
+    salvarCache(eventos);
+    mostrarEstado('ok');
+    renderTudo();
+  }
+  return dados;
+}
+
 function mostrarEstado(tipo, extra){
   const box = document.getElementById('estado');
   box.innerHTML = '';
-  if(tipo === 'ok'){ return; }
+  if(tipo === 'ok') return;
 
   const f = document.createElement('div');
   f.className = 'faixa-estado';
 
   if(tipo === 'carregando'){
-    f.textContent = 'Buscando as provas na planilha…';
+    f.textContent = 'Buscando as provas…';
   }else if(tipo === 'demo'){
     f.classList.add('alerta');
     f.innerHTML = '<span><b>Modo demonstração.</b> Os itens abaixo são exemplos — ' +
-      'cole o link CSV da planilha em <code>CSV_URL</code> para valer de verdade.</span>';
+      'falta colar a URL do Apps Script em <code>API_URL</code>.</span>';
   }else if(tipo === 'cache'){
     f.classList.add('alerta');
-    f.innerHTML = '<span><b>Sem conexão com a planilha.</b> Mostrando a última versão salva neste aparelho.</span>' +
-      '<div class="spacer"></div>';
+    f.innerHTML = '<span><b>Sem conexão.</b> Mostrando a última versão vista neste aparelho.</span><div class="spacer"></div>';
     f.appendChild(botaoTentar());
-  }else if(tipo === 'ignoradas'){
-    f.classList.add('alerta');
-    f.innerHTML = '<span>' + extra + (extra === 1 ? ' linha da planilha foi ignorada' : ' linhas da planilha foram ignoradas') +
-      ' por estar sem data ou sem título.</span>';
   }else if(tipo === 'erro'){
     f.classList.add('ruim');
-    f.innerHTML = '<span><b>Não consegui ler a planilha</b> — ' + esc(extra) + '.</span><div class="spacer"></div>';
+    f.innerHTML = '<span><b>Não consegui carregar</b> — ' + esc(extra) + '.</span><div class="spacer"></div>';
     f.appendChild(botaoTentar());
   }
   box.appendChild(f);
@@ -591,6 +598,7 @@ function porDia(){
 }
 function cor(tipo){ return (TIPOS[tipo] || TIPOS.aviso).cor; }
 function rotulo(tipo){ return (TIPOS[tipo] || TIPOS.aviso).rotulo; }
+function editando(){ return !!senha; }
 
 /* ---------------- render: barra ---------------- */
 function renderChips(){
@@ -733,6 +741,7 @@ function renderTudo(){
   renderGrade();
   renderProximos();
   renderRodape();
+  document.getElementById('badge').classList.toggle('on', editando());
 }
 
 /* ---------------- navegacao ---------------- */
@@ -765,15 +774,242 @@ function abrirDia(iso){
         (e.materia ? ' · ' + esc(e.materia) : '') + '</span>' +
       '<b>' + esc(e.titulo) + '</b>' +
       (e.obs ? '<p>' + esc(e.obs) + '</p>' : '') + '</div>';
+
+    if(editando()){
+      const acoes = document.createElement('div');
+      acoes.className = 'acoes';
+
+      const bEd = document.createElement('button');
+      bEd.textContent = 'Editar';
+      bEd.onclick = () => { fechar('ov-dia'); abrirAdmin('form', e); };
+
+      const bEx = document.createElement('button');
+      bEx.textContent = 'Excluir';
+      bEx.onclick = async () => {
+        if(!confirm('Excluir "' + e.titulo + '"?')) return;
+        bEx.disabled = true; bEx.textContent = 'Excluindo…';
+        try{
+          await enviar({ acao:'remover', senha:senha, id:e.id });
+          abrirDia(iso);
+        }catch(err){
+          bEx.disabled = false; bEx.textContent = 'Excluir';
+          tratarFalha(err);
+        }
+      };
+
+      acoes.appendChild(bEd); acoes.appendChild(bEx);
+      el.appendChild(acoes);
+    }
     corpo.appendChild(el);
   }
+
+  const pe = document.getElementById('dia-pe');
+  pe.innerHTML = '';
+  if(editando()){
+    pe.appendChild(botao('+ Adicionar neste dia', 'pri', () => {
+      fechar('ov-dia'); abrirAdmin('form', { data: iso });
+    }));
+  }
+  pe.appendChild(botao('Fechar', '', () => fechar('ov-dia')));
+
   abrir('ov-dia');
+}
+
+/* ---------------- area de edicao ---------------- */
+function abrirAdmin(tela, evento){
+  const corpo = document.getElementById('adm-corpo');
+  const pe = document.getElementById('adm-pe');
+  const titulo = document.getElementById('adm-titulo');
+  corpo.innerHTML = ''; pe.innerHTML = '';
+
+  if(!API_URL){
+    titulo.textContent = 'Área de edição';
+    corpo.innerHTML = '<div class="aviso">A edição só funciona depois de ligar o Apps Script: ' +
+      'falta colar a URL dele em <code>API_URL</code>, no <code>index.html</code>.</div>';
+    pe.appendChild(botao('Fechar', '', () => fechar('ov-adm')));
+    abrir('ov-adm');
+    return;
+  }
+
+  /* --- entrar --- */
+  if(!editando()){
+    titulo.textContent = 'Área de edição';
+    corpo.innerHTML =
+      '<div class="campo"><label for="senha">Senha</label>' +
+        '<input id="senha" type="password" autocomplete="current-password"></div>' +
+      '<div class="recado" id="recado"></div>' +
+      '<p style="font-size:12.5px;color:var(--dim);margin:0">Quem só quer consultar o calendário ' +
+      'não precisa de senha — pode fechar esta janela.</p>';
+
+    const ok = botao('Entrar', 'pri', async () => {
+      const tentativa = document.getElementById('senha').value;
+      if(!tentativa) return recado('Digite a senha.', 'erro');
+      ok.disabled = true; ok.textContent = 'Verificando…';
+      try{
+        await enviar({ acao:'verificar', senha:tentativa });
+        senha = tentativa;
+        try{ sessionStorage.setItem(CHAVE_SENHA, senha); }catch(e){}
+        renderTudo();
+        abrirAdmin('painel');
+      }catch(err){
+        ok.disabled = false; ok.textContent = 'Entrar';
+        recado(err.message || 'não deu', 'erro');
+      }
+    });
+
+    const inp = corpo.querySelector('#senha');
+    inp.onkeydown = ev => { if(ev.key === 'Enter') ok.click(); };
+    pe.appendChild(botao('Cancelar', '', () => fechar('ov-adm')));
+    pe.appendChild(ok);
+    abrir('ov-adm');
+    setTimeout(() => inp.focus(), 50);
+    return;
+  }
+
+  /* --- formulario --- */
+  if(tela === 'form'){
+    const e = evento || {};
+    const materias = [...new Set(eventos.map(x => x.materia).filter(Boolean))];
+    titulo.textContent = e.id ? 'Editar item' : 'Novo item';
+    corpo.innerHTML =
+      '<div class="dupla">' +
+        '<div class="campo"><label for="f-data">Data</label>' +
+          '<input id="f-data" type="date" value="' + esc(e.data || '') + '"></div>' +
+        '<div class="campo"><label for="f-tipo">Tipo</label><select id="f-tipo">' +
+          Object.entries(TIPOS).map(p =>
+            '<option value="' + p[0] + '"' + (e.tipo === p[0] ? ' selected' : '') + '>' + p[1].rotulo + '</option>'
+          ).join('') +
+        '</select></div>' +
+      '</div>' +
+      '<div class="campo"><label for="f-materia">Matéria</label>' +
+        '<input id="f-materia" list="l-materias" value="' + esc(e.materia || '') + '" placeholder="Ex.: Matemática">' +
+        '<datalist id="l-materias">' + materias.map(m => '<option>' + esc(m) + '</option>').join('') + '</datalist></div>' +
+      '<div class="campo"><label for="f-titulo">Título</label>' +
+        '<input id="f-titulo" value="' + esc(e.titulo || '') + '" placeholder="Ex.: P2 — Cinemática"></div>' +
+      '<div class="campo"><label for="f-obs">Observações (opcional)</label>' +
+        '<textarea id="f-obs" placeholder="Conteúdo, páginas, regras...">' + esc(e.obs || '') + '</textarea></div>' +
+      '<div class="recado" id="recado"></div>';
+
+    const salvar = botao(e.id ? 'Salvar' : 'Adicionar', 'pri', async () => {
+      const dados = {
+        id: e.id || '',
+        data: document.getElementById('f-data').value,
+        tipo: document.getElementById('f-tipo').value,
+        materia: document.getElementById('f-materia').value.trim(),
+        titulo: document.getElementById('f-titulo').value.trim(),
+        obs: document.getElementById('f-obs').value.trim()
+      };
+      if(!dados.data)   return recado('Escolha a data.', 'erro');
+      if(!dados.titulo) return recado('Escreva um título.', 'erro');
+
+      salvar.disabled = true; salvar.textContent = 'Salvando…';
+      recado('', '');
+      try{
+        await enviar({ acao: e.id ? 'editar' : 'adicionar', senha:senha, evento:dados });
+        ano = deISO(dados.data).getFullYear();
+        mes = deISO(dados.data).getMonth();
+        renderTudo();
+        abrirAdmin('painel');
+      }catch(err){
+        salvar.disabled = false; salvar.textContent = e.id ? 'Salvar' : 'Adicionar';
+        if(!tratarFalha(err)) recado(err.message || 'não deu', 'erro');
+      }
+    });
+
+    pe.appendChild(botao('Voltar', '', () => abrirAdmin('painel')));
+    pe.appendChild(salvar);
+    abrir('ov-adm');
+    setTimeout(() => {
+      const alvo = document.getElementById(e.data ? 'f-titulo' : 'f-data');
+      if(alvo) alvo.focus();
+    }, 50);
+    return;
+  }
+
+  /* --- painel --- */
+  titulo.textContent = 'Painel de edição';
+  const ordenados = eventos.slice().sort((a,b) => String(a.data).localeCompare(String(b.data)));
+
+  corpo.innerHTML = '<div class="recado" id="recado"></div><div class="lista-adm" id="lista-adm"></div>';
+  const lista = corpo.querySelector('#lista-adm');
+
+  if(!ordenados.length){
+    lista.innerHTML = '<div class="vazio">Nenhum item cadastrado.</div>';
+  }
+  for(const e of ordenados){
+    const d = deISO(e.data);
+    const l = document.createElement('div');
+    l.className = 'lin';
+    l.style.setProperty('--t', cor(e.tipo));
+    l.innerHTML =
+      '<span class="d">' + pad(d.getDate()) + '/' + pad(d.getMonth()+1) + '/' + String(d.getFullYear()).slice(2) + '</span>' +
+      '<span class="t"><i>' + rotulo(e.tipo) + '</i> · ' + esc(e.materia || '—') + ' · ' + esc(e.titulo) + '</span>';
+
+    const bEd = document.createElement('button');
+    bEd.textContent = '✎'; bEd.title = 'Editar';
+    bEd.onclick = () => abrirAdmin('form', e);
+
+    const bEx = document.createElement('button');
+    bEx.textContent = '🗑'; bEx.title = 'Excluir';
+    bEx.onclick = async () => {
+      if(!confirm('Excluir "' + e.titulo + '"?')) return;
+      bEx.disabled = true;
+      try{
+        await enviar({ acao:'remover', senha:senha, id:e.id });
+        abrirAdmin('painel');
+      }catch(err){
+        bEx.disabled = false;
+        if(!tratarFalha(err)) recado(err.message || 'não deu', 'erro');
+      }
+    };
+
+    l.appendChild(bEd); l.appendChild(bEx);
+    lista.appendChild(l);
+  }
+
+  pe.appendChild(botao('Sair da edição', '', sair));
+  pe.appendChild(botao('+ Novo item', 'pri', () => abrirAdmin('form', { data: paraISO(new Date(ano, mes, 1)) })));
+  abrir('ov-adm');
+}
+
+/* Senha trocada no Apps Script enquanto a sessão estava aberta:
+   derruba a sessão em vez de insistir com uma senha morta. */
+function tratarFalha(err){
+  if(String(err && err.message).indexOf('senha') >= 0){
+    senha = '';
+    try{ sessionStorage.removeItem(CHAVE_SENHA); }catch(e){}
+    renderTudo();
+    abrirAdmin('login');
+    recado('A senha não foi aceita. Entre de novo.', 'erro');
+    return true;
+  }
+  return false;
+}
+
+function sair(){
+  senha = '';
+  try{ sessionStorage.removeItem(CHAVE_SENHA); }catch(e){}
+  fechar('ov-adm');
+  renderTudo();
 }
 
 /* ---------------- helpers ---------------- */
 function esc(s){
   return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
     ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+function recado(msg, classe){
+  const el = document.getElementById('recado');
+  if(!el) return;
+  el.textContent = msg;
+  el.className = 'recado' + (classe ? ' ' + classe : '');
+}
+function botao(txt, cls, fn){
+  const b = document.createElement('button');
+  b.className = 'btn' + (cls ? ' ' + cls : '');
+  b.textContent = txt;
+  b.onclick = fn;
+  return b;
 }
 function abrir(id){ document.getElementById(id).classList.add('on'); }
 function fechar(id){ document.getElementById(id).classList.remove('on'); }
@@ -855,6 +1091,9 @@ document.getElementById('filtro-materia').onchange = function(){
   filtroMateria = this.value; renderTudo();
 };
 document.getElementById('btn-recarregar').onclick = () => { if(!carregando) carregar(); };
+document.getElementById('btn-admin').onclick = () => abrirAdmin(editando() ? 'painel' : 'login');
+document.getElementById('btn-painel').onclick = () => abrirAdmin('painel');
+document.getElementById('btn-sair').onclick = sair;
 
 let larguraAnterior = window.innerWidth;
 let limiteAnterior = limiteEventos();
@@ -868,11 +1107,12 @@ window.addEventListener('resize', () => {
 
 /* Quem deixa a aba aberta o dia todo recebe o que mudou ao voltar. */
 document.addEventListener('visibilitychange', () => {
-  if(!document.hidden && CSV_URL && Date.now() - atualizadoEm > 300000) carregar();
+  if(!document.hidden && API_URL && Date.now() - atualizadoEm > 300000) carregar();
 });
 
 renderTudo();
 carregar();
+if(location.hash === '#admin') abrirAdmin(editando() ? 'painel' : 'login');
 </script>
 </body>
 </html>
