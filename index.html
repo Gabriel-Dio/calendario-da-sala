@@ -60,7 +60,7 @@ button[disabled]{opacity:.55;cursor:default}
   width:34px;height:34px;display:grid;place-items:center;font-size:16px;
 }
 .nav button:hover{background:var(--surface-2)}
-#rotulo-mes{min-width:160px;text-align:center;font-weight:650;font-size:16px;text-transform:capitalize}
+#rotulo-mes{min-width:110px;text-align:center;font-weight:650;font-size:16px;text-transform:capitalize}
 .btn-hoje{
   background:transparent;border:1px solid var(--border);border-radius:9px;
   padding:7px 12px;font-size:13px;font-weight:600;
@@ -435,7 +435,7 @@ function deISO(iso){
   return new Date(p[0], p[1]-1, p[2]);
 }
 function diasEntre(isoA, isoB){ return Math.round((deISO(isoB) - deISO(isoA)) / 86400000); }
-function nomeMes(a, m){ return new Date(a, m, 1).toLocaleDateString('pt-BR', { month:'long', year:'numeric' }); }
+function nomeMes(a, m){ return new Date(a, m, 1).toLocaleDateString('pt-BR', { month:'long' }); }
 function dataLonga(iso){ return deISO(iso).toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' }); }
 
 /* ---------------- normalizacao ---------------- */
