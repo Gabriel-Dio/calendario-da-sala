@@ -67,6 +67,8 @@ button[disabled]{opacity:.55;cursor:default}
   padding:10px 12px;box-shadow:var(--shadow);margin-bottom:12px;
 }
 .bar-linha{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.navegacao{display:flex;align-items:center;gap:10px}
+.ferramentas{display:flex;align-items:center;gap:8px}
 .sala{
   display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
   font-size:13px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
@@ -222,11 +224,26 @@ select{
 /* ---------- telas estreitas ---------- */
 @media (max-width:620px){
   .bar{padding:9px 10px;gap:8px}
-  .bar-linha{gap:7px}
-  .sala{font-size:11.5px;padding:5px 10px;letter-spacing:.04em}
-  #rotulo-mes{min-width:0;font-size:15px;flex:1}
+  .bar-linha{gap:8px}
+
+  /* Duas fileiras deliberadas:
+       1ª  1º ANO A .................... ⟳ ◐ ⚙
+       2ª  ‹   outubro   ›   Hoje
+     O espaçador some e as ferramentas vão para a direita por
+     margin, para a quebra cair sempre entre os dois blocos. */
+  .sala{order:1;font-size:11.5px;padding:5px 10px;letter-spacing:.04em}
+  .ferramentas{order:2;margin-left:auto}
+  .navegacao{order:3;flex:1 1 100%;gap:8px}
+  .bar-linha .spacer{display:none}
+
   .nav{flex:1;gap:2px}
-  .tema{width:34px;padding:0;justify-content:center}
+  #rotulo-mes{min-width:0;font-size:15px;flex:1}
+  .btn-hoje{flex:0 0 auto}
+
+  /* alvos de toque maiores */
+  .gear{font-size:17px;padding:6px 8px;opacity:.4}
+  .icone-acao,.nav button{width:36px;height:36px}
+  .tema{width:36px;height:36px;padding:0;justify-content:center}
   .tema-txt{display:none}
 
   .dia{padding:4px}
@@ -318,25 +335,34 @@ label{display:block;font-size:12.5px;font-weight:650;color:var(--dim);margin:0 0
 <div class="wrap">
 
   <div class="bar">
+    <!-- Agrupado em blocos de propósito: no celular a barra quebra
+         entre .navegacao e .ferramentas, nunca no meio deles. -->
     <div class="bar-linha">
       <span class="sala">1º Ano A</span>
-      <div class="nav">
-        <button id="ant" title="Mês anterior">&lsaquo;</button>
-        <span id="rotulo-mes"></span>
-        <button id="prox" title="Mês seguinte">&rsaquo;</button>
+
+      <div class="navegacao">
+        <div class="nav">
+          <button id="ant" title="Mês anterior">&lsaquo;</button>
+          <span id="rotulo-mes"></span>
+          <button id="prox" title="Mês seguinte">&rsaquo;</button>
+        </div>
+        <button class="btn-hoje" id="btn-hoje">Hoje</button>
       </div>
-      <button class="btn-hoje" id="btn-hoje">Hoje</button>
+
       <div class="spacer"></div>
-      <button class="icone-acao" id="btn-recarregar" title="Buscar atualizações" aria-label="Atualizar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20.5 3.5V10h-6.5"/>
-        </svg>
-      </button>
-      <button class="tema" id="btn-tema">
-        <span class="tema-icone" id="tema-icone"></span>
-        <span class="tema-txt" id="tema-txt"></span>
-      </button>
-      <button class="gear" id="btn-admin" title="Área de edição" aria-label="Área de edição">&#9881;</button>
+
+      <div class="ferramentas">
+        <button class="icone-acao" id="btn-recarregar" title="Buscar atualizações" aria-label="Atualizar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20.5 3.5V10h-6.5"/>
+          </svg>
+        </button>
+        <button class="tema" id="btn-tema">
+          <span class="tema-icone" id="tema-icone"></span>
+          <span class="tema-txt" id="tema-txt"></span>
+        </button>
+        <button class="gear" id="btn-admin" title="Área de edição" aria-label="Área de edição">&#9881;</button>
+      </div>
     </div>
     <div class="chips" id="chips"></div>
   </div>
