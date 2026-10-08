@@ -67,7 +67,6 @@ button[disabled]{opacity:.55;cursor:default}
   padding:10px 12px;box-shadow:var(--shadow);margin-bottom:12px;
 }
 .bar-linha{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.navegacao{display:flex;align-items:center;gap:10px}
 .ferramentas{display:flex;align-items:center;gap:8px}
 .sala{
   display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
@@ -83,12 +82,7 @@ button[disabled]{opacity:.55;cursor:default}
 }
 .nav button:hover{background:var(--surface-2)}
 #rotulo-mes{min-width:110px;text-align:center;font-weight:650;font-size:16px;text-transform:capitalize}
-.btn-hoje{
-  background:transparent;border:1px solid var(--border);border-radius:9px;
-  padding:7px 12px;font-size:13px;font-weight:600;
-}
-.btn-hoje:hover{background:var(--surface-2)}
-.sala-curto,.hoje-icone{display:none}   /* versões compactas, só no celular */
+.sala-curto{display:none}   /* etiqueta compacta, só no celular */
 .bar .spacer{flex:1}
 select{
   background:var(--surface-2);border:1px solid var(--border);border-radius:9px;
@@ -230,7 +224,7 @@ select{
   .bar{padding:9px 8px;gap:8px}
 
   /* Tudo numa fileira só:
-       ⬤ 1º A   ‹ outubro ›  ⊙   ⟳  ◐  ⚙
+       ⬤ 1º A   ‹ outubro ›   ⟳  ◐  ⚙
      nowrap garante que nunca quebre. Em vez de disputar espaço, o
      nome do mês é o único elemento que encolhe — e, no pior caso
      (tela bem estreita + "fevereiro"), corta com reticências em vez
@@ -243,16 +237,11 @@ select{
   .sala-longo{display:none}
   .sala-curto{display:inline}
 
-  .navegacao{flex:1 1 auto;min-width:0;gap:5px}
   .nav{flex:1 1 auto;min-width:0;gap:2px}
   #rotulo-mes{
     flex:1 1 auto;min-width:0;font-size:14px;
     overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   }
-
-  .btn-hoje{flex:0 0 30px;width:30px;height:30px;padding:0;display:grid;place-items:center}
-  .hoje-txt{display:none}
-  .hoje-icone{display:block;width:17px;height:17px}
 
   .ferramentas{flex:0 0 auto;gap:4px}
   .icone-acao,.nav button{width:30px;height:30px}
@@ -351,23 +340,15 @@ label{display:block;font-size:12.5px;font-weight:650;color:var(--dim);margin:0 0
 <div class="wrap">
 
   <div class="bar">
-    <!-- Agrupado em blocos de propósito: no celular a barra quebra
-         entre .navegacao e .ferramentas, nunca no meio deles. -->
+    <!-- No celular esta linha é nowrap: nunca quebra. O nome do mês
+         é o único que encolhe quando o espaço aperta. -->
     <div class="bar-linha">
       <span class="sala"><span class="sala-longo">1º Ano A</span><span class="sala-curto">1º A</span></span>
 
-      <div class="navegacao">
-        <div class="nav">
-          <button id="ant" title="Mês anterior">&lsaquo;</button>
-          <span id="rotulo-mes"></span>
-          <button id="prox" title="Mês seguinte">&rsaquo;</button>
-        </div>
-        <button class="btn-hoje" id="btn-hoje" title="Ir para o mês atual">
-          <span class="hoje-txt">Hoje</span>
-          <svg class="hoje-icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/>
-          </svg>
-        </button>
+      <div class="nav">
+        <button id="ant" title="Mês anterior">&lsaquo;</button>
+        <span id="rotulo-mes"></span>
+        <button id="prox" title="Mês seguinte">&rsaquo;</button>
       </div>
 
       <div class="spacer"></div>
@@ -1169,9 +1150,6 @@ document.getElementById('btn-tema').onclick = () => {
 /* ---------------- ligacoes ---------------- */
 document.getElementById('ant').onclick  = () => mover(-1);
 document.getElementById('prox').onclick = () => mover(1);
-document.getElementById('btn-hoje').onclick = () => {
-  ano = hoje.getFullYear(); mes = hoje.getMonth(); renderTudo();
-};
 document.getElementById('btn-recarregar').onclick = () => { if(!carregando) carregar(); };
 document.getElementById('btn-admin').onclick = () => abrirAdmin(editando() ? 'painel' : 'login');
 document.getElementById('btn-painel').onclick = () => abrirAdmin('painel');
